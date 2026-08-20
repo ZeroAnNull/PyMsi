@@ -5,7 +5,7 @@
 ## 安装
 
 ```bash
-pip install https://github.com/ZeroAnNull/PyMsi/releases/download/v1.4.2/pymsi-1.4.2-py3-none-any.whl
+pip install https://github.com/ZeroAnNull/PyMsi/releases/download/v1.4.3/pymsi-1.4.3-py3-none-any.whl
 ```
 
 ## 快速开始
