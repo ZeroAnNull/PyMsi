@@ -23,12 +23,12 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.4.1                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→字体TTF | 别名语法   ║
+║                    PyMsi  v1.4.2                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | 别名 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.4.1-py3-none-any.whl
+    pip install pymsi-1.4.2-py3-none-any.whl
 
 【快速开始】
 
@@ -84,6 +84,17 @@ _README = r"""
     #   PM.image.to_font / to_ttf / build_font / make_font (folder, out)
     #   PM.image.ttf.build / make / run / go / generate / create 都是同方法
 
+    # ─── 方式五：输入文件地址 → 解析 Hex 全部输出到终端 ───
+    PM.hex("C:/some/file.bin")                      # 直接 dump 全部 hex
+    PM.hex.find("C:/my_project", "config.dat")       # 目录里搜文件名后解析
+    PM.hex.dump("C:/file.bin", bytes_per_line=16,
+                start_offset=0, max_bytes=512)       # 带参数
+    # ↑ 等价写法:
+    #   PM.hexdump(...)  PM.hd(...)   PM.hexview(...)
+    #   PM.hex(...)       短调用也行
+    #   PM.hex.find / search / locate (目录, 文件名)
+    #   PM.hex.dump / view / show / print / parse / read (path, ...)
+
 ────────────────────────────────────────────────────────────
 【API 完整参考】
 
@@ -137,6 +148,26 @@ _README = r"""
 
   PM.image.ttf.help()         查看详细教程与示例
 
+  PM.hex(path)                输入文件地址 → 解析 Hex 全部输出到终端
+    path: str                 文件路径 (展开 ~ 和环境变量)
+    bytes_per_line: int       每行字节数 (默认 16)
+    group_size: int           每组字节数 (默认 2), 0=不分组
+    show_ascii: bool          显示右侧 ASCII 列 (默认 True)
+    uppercase: bool           hex 大写 (默认 True)
+    start_offset: int         起始字节偏移 (默认 0)
+    max_bytes: int            最多读取字节数 (默认 None=全部; >64MB 自动截断)
+    offset_base: str          偏移进制 'hex'/'dec' (默认 'hex')
+    返回: int                 成功返回解析的字节数, 失败返回 None
+
+  PM.hex.find(directory, name)  在目录中递归搜索文件名后解析
+    directory: str            搜索起始目录
+    name: str                 文件名 (大小写不敏感包含匹配)
+    其余参数同 PM.hex()
+
+  PM.hex == PM.hexdump == PM.hd == PM.hexview
+  PM.hex.find / search / locate   都是同一方法
+  PM.hex.dump / view / show / print / parse / read  都是同一方法
+
 ────────────────────────────────────────────────────────────
 【图片 → 字体 TTF 用法示例】
 
@@ -155,6 +186,21 @@ _README = r"""
   方式三：GIF 动画逐帧转字形
     frames.gif 会被拆成 帧1→A 帧2→B 帧3→C...
     (可用 start_char="A" 指定起始字符)
+
+────────────────────────────────────────────────────────────
+【文件 Hex 解析用法示例】
+
+  方式一：直接给文件路径
+    PM.hex("C:/data/file.bin")
+    # → 终端输出类似 xxd 的 hex dump, 含偏移/十六进制/ASCII
+
+  方式二：在目录里搜索文件名
+    PM.hex.find("C:/my_project", "config")  # 匹配所有含 config 的文件
+
+  方式三：控制输出格式
+    PM.hex("C:/file.bin", bytes_per_line=8, uppercase=False)
+    PM.hex("C:/file.bin", start_offset=1024, max_bytes=256)
+    PM.hex("C:/file.bin", group_size=0, show_ascii=False)
 
 ────────────────────────────────────────────────────────────
 【内置游戏列表 (30款)】
@@ -808,6 +854,7 @@ class _MSIBuilder:
 from .html_builder import _HTMLBuilder, _HTMLModule
 from .game import _GameModule, _GAME_NAMES
 from .image import _ImageModule
+from .hex import _HexModule
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -839,6 +886,7 @@ class _PyMsi:
         self._html_module = _HTMLModule(self._html_builder, self._print_readme)
         self._game_module = _GameModule()
         self._image_module = _ImageModule()
+        self._hex_module = _HexModule()
 
     def __call__(self, path):
         """
@@ -1045,6 +1093,22 @@ class _PyMsi:
         """别名: PM.ttf(folder, out) = PM.image.ttf(...)"""
         return self._image_module._ttf
 
+    # hex 子模块别名: PM.hexdump / PM.hd / PM.hexview
+    @property
+    def hexdump(self):
+        """别名: PM.hexdump = PM.hex"""
+        return self._hex_module
+
+    @property
+    def hd(self):
+        """短别名: PM.hd = PM.hex"""
+        return self._hex_module
+
+    @property
+    def hexview(self):
+        """别名: PM.hexview = PM.hex"""
+        return self._hex_module
+
     @property
     def html(self):
         """
@@ -1098,6 +1162,28 @@ class _PyMsi:
         """
         return self._image_module
 
+    @property
+    def hex(self):
+        """
+        文件 Hex 解析子模块
+
+        输入文件地址 → 找到对应文件 → 解析 16 进制 → 全部输出到终端
+
+        用法:
+            # 直接给文件路径, 全部 hex 输出到终端
+            PM.hex("C:/some/file.bin")
+
+            # 在目录里按文件名搜索, 找到后解析
+            PM.hex.find("C:/my_project", "config.dat")
+
+            # 带参数控制输出格式
+            PM.hex.dump("C:/file.bin", bytes_per_line=16,
+                        start_offset=0, max_bytes=512)
+
+            # PM.hex == PM.hexdump == PM.hd == PM.hexview
+        """
+        return self._hex_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -1116,7 +1202,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.4.1"
+PM.__version__ = "1.4.2"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
