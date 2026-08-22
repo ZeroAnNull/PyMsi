@@ -1,11 +1,11 @@
 # PyMsi
 
-**文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | 全别名语法**
+**文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 全别名语法**
 
 ## 安装
 
 ```bash
-pip install https://github.com/ZeroAnNull/PyMsi/releases/download/v1.4.3/pymsi-1.4.3-py3-none-any.whl
+pip install https://github.com/ZeroAnNull/PyMsi/releases/download/v1.4.4/pymsi-1.4.4-py3-none-any.whl
 ```
 
 ## 快速开始
@@ -28,9 +28,32 @@ PM.image.ttf("C:/glyphs", "out.ttf")
 # 文件 Hex 解析 (输入文件地址 → 全部 hex 输出到终端)
 PM.hex("C:/file.bin")
 
-# 在目录里搜文件名后解析
-PM.hex.find("C:/project", "config")
+# AI 空壳 (设 key + 官网后问问题, 输出自动 print)
+PM.ai.key = "sk-xxx"
+PM.ai.url = "https://api.openai.com"
+PM.ai.imput("你好")
 ```
+
+## AI 空壳功能
+
+本质上是个空壳: 告诉它 API Key 和 AI API 官网, 就能问 AI 问题。
+输出在库里直接 print 写死, 不用自己写 print 加双引号。
+
+```python
+PM.ai.key = "sk-xxxxxxxx"                  # 1. 设 API Key
+PM.ai.url = "https://api.openai.com"       # 2. 设 AI API 官网 (OpenAI 兼容接口都行)
+PM.ai.imput("你好, 你是谁?")                # 3. 问问题 → 终端自动输出回答
+
+print(PM.ai.output)                        # 拿原始输出文本
+PM.ai.model = "deepseek-chat"               # 换模型
+PM.ai.clear()                               # 清空对话历史
+```
+
+兼容 OpenAI 接口的服务都行: OpenAI / DeepSeek / Moonshot / 通义千问 / 智谱 等。
+
+别名:
+- `PM.ai == PM.AI == PM.gpt == PM.llm == PM.chatbot`
+- `PM.ai.imput / ask / chat / question / send / say / talk / q` 都是同一方法
 
 ## Hex 解析功能
 
@@ -49,4 +72,4 @@ PM.hex.find("C:/project", "config")
 
 ## 别名语法
 
-全模块支持别名，怎么写都行：`PM.b("path")` `PM.h("html")` `PM.g("Snake")` `PM.i("glyphs","out.ttf")` `PM.font(...)` `PM.hd("file.bin")` `PM.html.win()` ...
+全模块支持别名，怎么写都行：`PM.b("path")` `PM.h("html")` `PM.g("Snake")` `PM.i("glyphs","out.ttf")` `PM.font(...)` `PM.hd("file.bin")` `PM.ai("你好")` `PM.html.win()` ...

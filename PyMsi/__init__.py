@@ -23,12 +23,12 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.4.3                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | 别名 ║
+║                    PyMsi  v1.4.4                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.4.3-py3-none-any.whl
+    pip install pymsi-1.4.4-py3-none-any.whl
 
 【快速开始】
 
@@ -94,6 +94,17 @@ _README = r"""
     #   PM.hex(...)       短调用也行
     #   PM.hex.find / search / locate (目录, 文件名)
     #   PM.hex.dump / view / show / print / parse / read (path, ...)
+
+    # ─── 方式六：AI 空壳 — 设 key + 官网后问问题 ───
+    PM.ai.key = "sk-xxxxxxxx"                       # 1. 设 API Key
+    PM.ai.url = "https://api.openai.com"            # 2. 设 AI API 官网
+    PM.ai.imput("你好, 你是谁?")                     # 3. 问问题 (输出自动 print)
+    # ↑ 等价写法:
+    #   PM.ai("你好")            直接调用也行
+    #   PM.ai.ask / chat / question / send / say / talk  都是 imput 别名
+    #   PM.AI / PM.gpt / PM.llm / PM.chatbot 都是 ai 别名
+    #   print(PM.ai.output)      拿原始输出文本
+    #   PM.ai.model = "deepseek-chat"   换模型 (OpenAI 兼容接口都行)
 
 ────────────────────────────────────────────────────────────
 【API 完整参考】
@@ -167,6 +178,16 @@ _README = r"""
   PM.hex == PM.hexdump == PM.hd == PM.hexview
   PM.hex.find / search / locate   都是同一方法
   PM.hex.dump / view / show / print / parse / read  都是同一方法
+
+  PM.ai.key = key              设 API Key (必填)
+  PM.ai.url = url              设 AI API 官网 (必填, OpenAI 兼容接口)
+  PM.ai.imput(question)        问 AI 问题, 输出自动 print 到终端
+  PM.ai.output                 AI 的输出 (只读, 调用 imput 后更新)
+  PM.ai.model = name           换模型 (默认 gpt-3.5-turbo)
+  PM.ai.clear()                清空对话历史
+
+  PM.ai == PM.AI == PM.gpt == PM.llm == PM.chatbot
+  PM.ai.imput / ask / chat / question / send / say / talk / q  都是同一方法
 
 ────────────────────────────────────────────────────────────
 【图片 → 字体 TTF 用法示例】
@@ -855,6 +876,7 @@ from .html_builder import _HTMLBuilder, _HTMLModule
 from .game import _GameModule, _GAME_NAMES
 from .image import _ImageModule
 from .hex import _HexModule
+from .ai import _AIModule
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -887,6 +909,7 @@ class _PyMsi:
         self._game_module = _GameModule()
         self._image_module = _ImageModule()
         self._hex_module = _HexModule()
+        self._ai_module = _AIModule()
 
     def __call__(self, path):
         """
@@ -1184,6 +1207,43 @@ class _PyMsi:
         """
         return self._hex_module
 
+    @property
+    def ai(self):
+        """
+        AI 空壳子模块 — 告诉它 API Key + AI API 官网, 就能问 AI 问题
+
+        用法:
+            PM.ai.key = "sk-xxx"                      # 1. 设 API Key
+            PM.ai.url = "https://api.openai.com"      # 2. 设 AI API 官网
+            PM.ai.imput("你好, 你是谁?")               # 3. 问问题 (输出自动 print)
+
+            # PM.ai("问题")  直接问也行
+            # print(PM.ai.output)  拿原始输出文本
+            # PM.ai.ask / chat / question / send / say  都是 imput 别名
+        """
+        return self._ai_module
+
+    # ai 子模块别名: PM.AI / PM.gpt / PM.chat / PM.llm
+    @property
+    def AI(self):
+        """别名: PM.AI = PM.ai"""
+        return self._ai_module
+
+    @property
+    def gpt(self):
+        """别名: PM.gpt = PM.ai"""
+        return self._ai_module
+
+    @property
+    def llm(self):
+        """别名: PM.llm = PM.ai"""
+        return self._ai_module
+
+    @property
+    def chatbot(self):
+        """别名: PM.chatbot = PM.ai"""
+        return self._ai_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -1202,7 +1262,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.4.3"
+PM.__version__ = "1.4.4"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name

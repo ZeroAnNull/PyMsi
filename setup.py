@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name="PyMsi",
-    version="1.4.3",
-    description="文件夹→MSI | HTML→EXE(Electron) | 30+游戏 | 图片→TTF | Hex解析 — 脚本式API，大量别名",
+    version="1.4.4",
+    description="文件夹→MSI | HTML→EXE(Electron) | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 — 脚本式API，大量别名",
     author="PyMsi",
     packages=find_packages(),
     python_requires=">=3.7",
