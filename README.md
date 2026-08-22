@@ -5,7 +5,7 @@
 ## 安装
 
 ```bash
-pip install https://github.com/ZeroAnNull/PyMsi/releases/download/v1.4.4/pymsi-1.4.4-py3-none-any.whl
+pip install https://github.com/ZeroAnNull/PyMsi/releases/download/v1.4.5/pymsi-1.4.5-py3-none-any.whl
 ```
 
 ## 快速开始
@@ -38,15 +38,20 @@ PM.ai.imput("你好")
 
 本质上是个空壳: 告诉它 API Key 和 AI API 官网, 就能问 AI 问题。
 输出在库里直接 print 写死, 不用自己写 print 加双引号。
+**输入和输出都能当变量用**, 方便在源代码里继续处理。
 
 ```python
 PM.ai.key = "sk-xxxxxxxx"                  # 1. 设 API Key
 PM.ai.url = "https://api.openai.com"       # 2. 设 AI API 官网 (OpenAI 兼容接口都行)
 PM.ai.imput("你好, 你是谁?")                # 3. 问问题 → 终端自动输出回答
 
-print(PM.ai.output)                        # 拿原始输出文本
+# 输入和输出都能当变量用
+q = PM.ai.input                            # 上次问的问题
+a = PM.ai.output                           # AI 的回答
+print(q, "->", a)
+
 PM.ai.model = "deepseek-chat"               # 换模型
-PM.ai.clear()                               # 清空对话历史
+PM.ai.clear()                               # 清空对话历史 + 输入 + 输出
 ```
 
 兼容 OpenAI 接口的服务都行: OpenAI / DeepSeek / Moonshot / 通义千问 / 智谱 等。
@@ -54,6 +59,8 @@ PM.ai.clear()                               # 清空对话历史
 别名:
 - `PM.ai == PM.AI == PM.gpt == PM.llm == PM.chatbot`
 - `PM.ai.imput / ask / chat / question / send / say / talk / q` 都是同一方法
+- `PM.ai.input / Input / prompt / question_text` 都是输入别名
+- `PM.ai.output / Output / answer / result` 都是输出别名
 
 ## Hex 解析功能
 

@@ -3,6 +3,10 @@
 本质上是一个空壳: 你告诉它 API Key 和 AI API 官网, 就能问 AI 问题。
 所有输出在库里直接 print 写死, 不需要自己写 print 加双引号。
 
+输入和输出都可以当变量使用 (调用 imput 后):
+    PM.ai.input  -> 上次问的问题
+    PM.ai.output -> AI 的回答
+
 用法:
     import PyMsi as PM
 
@@ -15,8 +19,10 @@
     # 3. 问 AI 问题 (输出会自动 print 到终端, 不用自己加双引号)
     PM.ai.imput("你好, 你是谁?")
 
-    # 4. 想再拿到原始输出文本也行
-    print(PM.ai.output)
+    # 4. 输入和输出都能当变量用
+    q = PM.ai.input       # 上次问的问题
+    a = PM.ai.output      # AI 的回答
+    print(q, a)
 """
 
 import json
@@ -41,13 +47,35 @@ class _AIModule:
         self.url = ""
         self.model = "gpt-3.5-turbo"
         self.timeout = 60
+        self._input = ""
         self._output = ""
         self._history = []
+
+    # ─── 输入 (只读属性, 调用 imput 后更新) ─────────────────
+    @property
+    def input(self):
+        """AI 的输入 (调用 imput 后更新, 可当变量用)"""
+        return self._input
+
+    @property
+    def Input(self):
+        """别名: AI 的输入 (大写 I)"""
+        return self._input
+
+    @property
+    def prompt(self):
+        """别名: AI 的输入"""
+        return self._input
+
+    @property
+    def question_text(self):
+        """别名: AI 的输入"""
+        return self._input
 
     # ─── 输出 (只读属性) ──────────────────────────────────
     @property
     def output(self):
-        """AI 的输出 (调用 imput 后更新)"""
+        """AI 的输出 (调用 imput 后更新, 可当变量用)"""
         return self._output
 
     @property
@@ -107,6 +135,8 @@ class _AIModule:
         """
         问 AI 问题 (输出会自动 print 到终端, 不用自己加双引号)
 
+        输入会存到 PM.ai.input, 输出会存到 PM.ai.output, 都可当变量用。
+
         Args:
             question: 要问的问题 (字符串; 不加引号传变量也行)
         Returns:
@@ -121,6 +151,9 @@ class _AIModule:
         # 非字符串自动转 str (支持 imput(123) 这种不带引号的写法)
         if not isinstance(question, str):
             question = str(question)
+
+        # 把输入存为变量 (无论后续是否报错, 输入都已存住)
+        self._input = question
 
         # 校验 key
         if not self.key:
@@ -226,8 +259,9 @@ class _AIModule:
 
     # ─── 清空对话历史 ──────────────────────────────────────
     def clear(self):
-        """清空对话历史"""
+        """清空对话历史 + 输入 + 输出"""
         self._history = []
+        self._input = ""
         self._output = ""
         return self
 
@@ -239,5 +273,6 @@ class _AIModule:
         status = []
         status.append("key=" + ("已设" if self.key else "未设"))
         status.append("url=" + ("已设" if self.url else "未设"))
-        return ("<PyMsi.ai> 空壳 AI | " + ", ".join(status) +
-                " | ai.key='...' ai.url='...' ai.imput('问题') | print(ai.output)")
+        has_io = "有输入输出" if (self._input or self._output) else "无输入输出"
+        return ("<PyMsi.ai> 空壳 AI | " + ", ".join(status) + ", " + has_io +
+                " | ai.key='...' ai.url='...' ai.imput('问题') | ai.input / ai.output (当变量用)")

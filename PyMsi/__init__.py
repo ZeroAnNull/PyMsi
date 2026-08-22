@@ -23,12 +23,12 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.4.4                            ║
+║                    PyMsi  v1.4.5                            ║
 ║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.4.4-py3-none-any.whl
+    pip install pymsi-1.4.5-py3-none-any.whl
 
 【快速开始】
 
@@ -103,7 +103,8 @@ _README = r"""
     #   PM.ai("你好")            直接调用也行
     #   PM.ai.ask / chat / question / send / say / talk  都是 imput 别名
     #   PM.AI / PM.gpt / PM.llm / PM.chatbot 都是 ai 别名
-    #   print(PM.ai.output)      拿原始输出文本
+    #   q = PM.ai.input          输入当变量用 (上次问的问题)
+    #   a = PM.ai.output         输出当变量用 (AI 的回答)
     #   PM.ai.model = "deepseek-chat"   换模型 (OpenAI 兼容接口都行)
 
 ────────────────────────────────────────────────────────────
@@ -182,12 +183,15 @@ _README = r"""
   PM.ai.key = key              设 API Key (必填)
   PM.ai.url = url              设 AI API 官网 (必填, OpenAI 兼容接口)
   PM.ai.imput(question)        问 AI 问题, 输出自动 print 到终端
-  PM.ai.output                 AI 的输出 (只读, 调用 imput 后更新)
+  PM.ai.input                  AI 的输入 (只读变量, 调用 imput 后更新)
+  PM.ai.output                 AI 的输出 (只读变量, 调用 imput 后更新)
   PM.ai.model = name           换模型 (默认 gpt-3.5-turbo)
-  PM.ai.clear()                清空对话历史
+  PM.ai.clear()                清空对话历史 + 输入 + 输出
 
   PM.ai == PM.AI == PM.gpt == PM.llm == PM.chatbot
   PM.ai.imput / ask / chat / question / send / say / talk / q  都是同一方法
+  PM.ai.input / Input / prompt / question_text  都是输入别名
+  PM.ai.output / Output / answer / result       都是输出别名
 
 ────────────────────────────────────────────────────────────
 【图片 → 字体 TTF 用法示例】
@@ -1262,7 +1266,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.4.4"
+PM.__version__ = "1.4.5"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
