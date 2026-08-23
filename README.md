@@ -161,3 +161,25 @@ PM.ai.clear()                               # 清空对话历史 + 输入 + 输�
 ## 别名语法
 
 全模块支持别名，怎么写都行：`PM.b("path")` `PM.h("html")` `PM.g("Snake")` `PM.i("glyphs","out.ttf")` `PM.font(...)` `PM.hd("file.bin")` `PM.ai("你好")` `PM.tr("你好")` `PM.translate.en("你好")` `PM.html.win()` ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##💬来聊天
+- 遇到bug？[提Issue]
+- 有想法或建议？[开Discussion]
+- 单纯想夸我？ 点个⭐就行，求求了！
