@@ -23,12 +23,12 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.4.5                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 ║
+║                    PyMsi  v1.4.6                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.4.5-py3-none-any.whl
+    pip install pymsi-1.4.6-py3-none-any.whl
 
 【快速开始】
 
@@ -106,6 +106,23 @@ _README = r"""
     #   q = PM.ai.input          输入当变量用 (上次问的问题)
     #   a = PM.ai.output         输出当变量用 (AI 的回答)
     #   PM.ai.model = "deepseek-chat"   换模型 (OpenAI 兼容接口都行)
+
+    # ─── 方式七：翻译 — 100+ 种语言 (LibreTranslate, 零依赖) ───
+    PM.translate("你好")                               # 中文 → 英文 (默认)
+    PM.translate.en("你好")                            # → 英语
+    PM.translate.ru("你好")                            # → 俄语
+    PM.translate.fr("你好")                            # → 法语
+    PM.translate.ko("你好")                            # → 韩语
+    PM.translate.ja("你好")                            # → 日语
+    PM.translate.de("你好")                            # → 德语
+    PM.translate.中文("Hello")                         # → 中文
+    PM.translate.to("你好", "es")                      # → 西语 (任意语言 code/名字都行)
+    # ↑ 等价写法:
+    #   PM.tr(...)  PM.trans(...)  PM.t(...)  PM.翻译(...)  都是 translate 别名
+    #   q = PM.translate.input       输入当变量用 (原文)
+    #   a = PM.translate.output      输出当变量用 (译文)
+    #   src/tgt = .source_lang/.target_lang  语言变量
+    #   PM.translate.languages()     看支持的所有语言
 
 ────────────────────────────────────────────────────────────
 【API 完整参考】
@@ -192,6 +209,27 @@ _README = r"""
   PM.ai.imput / ask / chat / question / send / say / talk / q  都是同一方法
   PM.ai.input / Input / prompt / question_text  都是输入别名
   PM.ai.output / Output / answer / result       都是输出别名
+
+  PM.translate(text, target, source)  翻译到指定语言 (默认目标 en, 源 auto)
+    text: str                 要翻译的原文
+    target: str               目标语言 code 或名字 ("en"/"英语"/"русский" 都行)
+    source: str               源语言 (默认 "auto" 自动检测)
+    返回: self                链式调用, 译文自动 print 到终端
+
+  PM.translate.to(text, target, source)  同 PM.translate() 更直观的名字
+  PM.translate.en/ru/fr/ko/ja/de/es/it/zh/th/vi/tr/pl...(text)  快捷目标语言
+  PM.translate.英语/俄语/法语/韩语/日语/德语/西语/中文/繁体(text)   中文名快捷调用
+  PM.translate.input / Input / text / original / source_text  上次输入的原文 (只读)
+  PM.translate.output / Output / result / translated / translation  上次译文 (只读)
+  PM.translate.source_lang / src / from_lang    上次源语言 code (只读)
+  PM.translate.target_lang / tgt / to_lang / lang  上次目标语言 code (只读)
+  PM.translate.languages() / list() / ls() / help()  打印常用语言列表
+  PM.translate.clear() / reset()                清空输入输出缓存
+  PM.translate.url = "..."                      自定义翻译服务器 (兼容 LibreTranslate API)
+  PM.translate.api_key / set_key()              自建实例的 API Key (可选)
+
+  PM.translate == PM.Translate == PM.tr == PM.trans == PM.t == PM.translation == PM.translator == PM.翻译 == PM.译
+  PM.translate.translate / to / 翻译 / trans / tr / t / do / run / go / make / convert / 转 / 翻  都是同一方法
 
 ────────────────────────────────────────────────────────────
 【图片 → 字体 TTF 用法示例】
@@ -881,6 +919,7 @@ from .game import _GameModule, _GAME_NAMES
 from .image import _ImageModule
 from .hex import _HexModule
 from .ai import _AIModule
+from .translate import _TranslateModule
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -914,6 +953,7 @@ class _PyMsi:
         self._image_module = _ImageModule()
         self._hex_module = _HexModule()
         self._ai_module = _AIModule()
+        self._translate_module = _TranslateModule()
 
     def __call__(self, path):
         """
@@ -1248,6 +1288,73 @@ class _PyMsi:
         """别名: PM.chatbot = PM.ai"""
         return self._ai_module
 
+    @property
+    def translate(self):
+        """
+        翻译子模块 — 100+ 种语言 (默认走 LibreTranslate API, 零依赖)
+
+        用法:
+            PM.translate("你好")                      # 中文 → 英文 (默认)
+            PM.translate.to("你好", "en")              # 明确指定目标语言
+            PM.translate.en("你好")                    # → 英语 (快捷)
+            PM.translate.ru("你好")                    # → 俄语 (快捷)
+            PM.translate.fr("你好")                    # → 法语 (快捷)
+            PM.translate.ko("你好")                    # → 韩语 (快捷)
+            PM.translate.ja("你好")                    # → 日语 (快捷)
+            PM.translate.de("你好")                    # → 德语 (快捷)
+            PM.translate.中文("Hello")                 # → 中文 (快捷)
+
+            # 输入输出都能当变量用
+            q = PM.translate.input                    # 上次输入的原文
+            a = PM.translate.output                   # 翻译结果
+            src = PM.translate.source_lang            # 源语言
+            tgt = PM.translate.target_lang            # 目标语言
+
+            # PM.tr / PM.trans / PM.t / PM.翻译  都是 translate 别名
+        """
+        return self._translate_module
+
+    # translate 子模块别名
+    @property
+    def Translate(self):
+        """别名: PM.Translate = PM.translate"""
+        return self._translate_module
+
+    @property
+    def tr(self):
+        """别名: PM.tr = PM.translate"""
+        return self._translate_module
+
+    @property
+    def trans(self):
+        """别名: PM.trans = PM.translate"""
+        return self._translate_module
+
+    @property
+    def translation(self):
+        """别名: PM.translation = PM.translate"""
+        return self._translate_module
+
+    @property
+    def translator(self):
+        """别名: PM.translator = PM.translate"""
+        return self._translate_module
+
+    @property
+    def t(self):
+        """别名: PM.t = PM.translate"""
+        return self._translate_module
+
+    @property
+    def 翻译(self):
+        """别名: PM.翻译 = PM.translate"""
+        return self._translate_module
+
+    @property
+    def 译(self):
+        """别名: PM.译 = PM.translate"""
+        return self._translate_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -1266,7 +1373,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.4.5"
+PM.__version__ = "1.4.6"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name

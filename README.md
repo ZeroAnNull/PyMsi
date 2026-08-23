@@ -1,11 +1,11 @@
 # PyMsi
 
-**文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 全别名语法**
+**文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译(100+语) | 全别名语法**
 
 ## 安装
 
 ```bash
-pip install https://github.com/ZeroAnNull/PyMsi/releases/download/v1.4.5/pymsi-1.4.5-py3-none-any.whl
+pip install https://github.com/ZeroAnNull/PyMsi/releases/download/v1.4.6/pymsi-1.4.6-py3-none-any.whl
 ```
 
 ## 快速开始
@@ -32,7 +32,88 @@ PM.hex("C:/file.bin")
 PM.ai.key = "sk-xxx"
 PM.ai.url = "https://api.openai.com"
 PM.ai.imput("你好")
+
+# 翻译 (100+ 种语言, 默认走 LibreTranslate API, 零依赖)
+PM.translate("你好")                           # 中文 → 英文 (默认)
+PM.translate.en("你好")                        # → 英语
+PM.translate.ru("你好")                        # → 俄语
+PM.translate.fr("你好")                        # → 法语
+PM.translate.ko("你好")                        # → 韩语
+PM.translate.ja("你好")                        # → 日语
+PM.translate.de("你好")                        # → 德语
+PM.translate.中文("Hello")                     # → 中文
+PM.translate.to("你好", "es")                  # → 西语 (任意 code/名字都行)
+# 输入输出都能当变量用
+q = PM.translate.input                         # 原文
+a = PM.translate.output                        # 译文
 ```
+
+## 翻译模块 (v1.4.6 新增)
+
+默认走 LibreTranslate 公开 API（100+ 种语言），3 个公开实例自动 fallback，单个挂了不会崩。
+**零第三方依赖**，urllib + json 搞定。
+
+```python
+# 快捷调用: 常用语言直接当方法名
+PM.translate.en("你好")      # → Hello (英语)
+PM.translate.ru("你好")      # → Привет (俄语)
+PM.translate.fr("你好")      # → Bonjour (法语)
+PM.translate.ko("你好")      # → 안녕하세요 (韩语)
+PM.translate.ja("你好")      # → こんにちは (日语)
+PM.translate.de("你好")      # → Hallo (德语)
+PM.translate.es("你好")      # → Hola (西语)
+PM.translate.it("你好")      # → Ciao (意语)
+PM.translate.pt("你好")      # → Olá (葡语)
+PM.translate.zh("Hello")     # → 你好 (中文)
+PM.translate.ar("你好")      # → مرحبا (阿语)
+PM.translate.hi("你好")      # → नमस्ते (印地语)
+PM.translate.th("你好")      # → สวัสดี (泰语)
+PM.translate.vi("你好")      # → Xin chào (越语)
+PM.translate.tr("你好")      # → Merhaba (土耳其语)
+PM.translate.pl("你好")      # → Cześć (波兰语)
+PM.translate.id("你好")      # → Halo (印尼语)
+PM.translate.nl("你好")      # → Hallo (荷兰语)
+PM.translate.sv("你好")      # → Hej (瑞典语)
+PM.translate.uk("你好")      # → Привіт (乌克兰语)
+# ... 50+ 常用语言快捷方法, 其余 50+ 用 PM.translate.to(原文, "code")
+
+# 用中文名也能调快捷方法
+PM.translate.英语("你好")
+PM.translate.俄语("你好")
+PM.translate.法语("你好")
+PM.translate.韩语("你好")
+PM.translate.日语("你好")
+PM.translate.德语("你好")
+PM.translate.西语("你好")
+PM.translate.中文("Hello")
+PM.translate.繁体("你好")
+
+# 通用 to() 方法 (指定 code 或语言名都可)
+PM.translate.to("你好", "英语")
+PM.translate.to("你好", "en")
+PM.translate.to("你好", "русский")
+PM.translate.to("Hello", "zh")
+
+# 输入输出当变量用 (全部只读)
+q = PM.translate.input         # 别名: Input / text / original / source_text / from_text
+a = PM.translate.output        # 别名: Output / result / answer / translated / translation
+s = PM.translate.source_lang   # 别名: src / from_lang
+t = PM.translate.target_lang   # 别名: tgt / to_lang / lang
+
+# 换翻译服务器 (自建 LibreTranslate / 其他兼容 API)
+PM.translate.url = "https://your-libretranslate.example.com"
+PM.translate.api_key = "xxxx"  # 自建实例如设了 key 就填
+
+# 看支持的语言 (纯本地, 不请求网络)
+PM.translate.languages()
+
+# 清空缓存
+PM.translate.clear()
+```
+
+**模块别名**（怎么写都行）：
+- `PM.translate == PM.Translate == PM.tr == PM.trans == PM.translation == PM.translator == PM.t == PM.翻译 == PM.译`
+- `.translate() / to() / 翻译() / trans() / tr() / t() / do() / run() / go() / make() / convert() / 转() / 翻()` 都是同一方法
 
 ## AI 空壳功能
 
@@ -79,4 +160,4 @@ PM.ai.clear()                               # 清空对话历史 + 输入 + 输�
 
 ## 别名语法
 
-全模块支持别名，怎么写都行：`PM.b("path")` `PM.h("html")` `PM.g("Snake")` `PM.i("glyphs","out.ttf")` `PM.font(...)` `PM.hd("file.bin")` `PM.ai("你好")` `PM.html.win()` ...
+全模块支持别名，怎么写都行：`PM.b("path")` `PM.h("html")` `PM.g("Snake")` `PM.i("glyphs","out.ttf")` `PM.font(...)` `PM.hd("file.bin")` `PM.ai("你好")` `PM.tr("你好")` `PM.translate.en("你好")` `PM.html.win()` ...
