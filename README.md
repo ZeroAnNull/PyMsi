@@ -1,11 +1,11 @@
 # PyMsi
 
-**文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译(100+语) | 全别名语法**
+**文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译(100+语) | 邮件(验证码) | 全别名语法**
 
 ## 安装
 
 ```bash
-pip install https://github.com/ZeroAnNull/PyMsi/releases/download/v1.4.6/pymsi-1.4.6-py3-none-any.whl
+pip install https://github.com/ZeroAnNull/PyMsi/releases/download/v1.4.7a1/pymsi-1.4.7a1-py3-none-any.whl
 ```
 
 ## 快速开始
@@ -48,7 +48,53 @@ q = PM.translate.input                         # 原文
 a = PM.translate.output                        # 译文
 ```
 
-## 翻译模块 (v1.4.6 新增)
+## 邮件模块 (v1.4.7a1 Alpha 新增)
+
+内置发件邮箱 `wns1@qq.com`（PyMsi 官方），用户告诉它授权码 + 收件人 + 内容，就能发邮件。
+**零第三方依赖**，纯 Python 标准库 `smtplib` + `email`。
+收件人支持任意邮箱：Gmail / Outlook / 163 / 126 / 网易 / QQ / 企业邮 都行。
+
+```python
+import PyMsi as PM
+
+# 1. 设 QQ 邮箱授权码 (不是登录密码! QQ邮箱→设置→账户→SMTP→生成)
+PM.dl.auth("你的QQ邮箱授权码")
+
+# 2. 设收件人 (任意邮箱都行)
+PM.dl.output("user@gmail.com")
+
+# 3. 发送邮件内容
+PM.dl.print("你的验证码是 123456, 5分钟内有效")
+
+# 一键发送验证码 (自动生成 6 位码 + 拼正文 + 发邮件)
+PM.dl.send_code()
+print(PM.dl.code)                              # 拿到刚生成的验证码做比对
+
+# 链式调用
+PM.dl.auth("码").output("a@b.com").print("验证码 654321")
+
+# 输入输出都当变量用
+to   = PM.dl.output                            # 收件人邮箱
+body = PM.dl.input                             # 上次发送的邮件内容
+code = PM.dl.code                              # 上次生成的验证码
+status = PM.dl.status                         # 上次发送结果
+
+# 修改邮件主题
+PM.dl.subject = "注册验证码"
+PM.dl.send_code()                             # 这次邮件主题就是"注册验证码"
+
+# 清空
+PM.dl.clear()
+```
+
+**模块别名**（怎么写都行）：
+- `PM.dl == PM.Dl == PM.mail == PM.Mail == PM.email == PM.Email == PM.deliver == PM.send == PM.smtp == PM.邮件 == PM.邮箱 == PM.发邮件`
+- `.auth(code)` 别名: `.authcode() / .apikey() / .token() / .password() / .set_auth()`
+- `.output(email)` 别名: `.to() / .recipient() / .target() / .send_to() / .收件人()`
+- `.print(content)` 别名: `.send() / .deliver() / .emit() / .发送() / .发邮件() / .mail() / .email()`
+- `.send_code()` 别名: `.verify() / .send_otp() / .send_captcha() / .验证码() / .发验证码() / .发码()`
+
+## 翻译模块 (v1.4.6)
 
 默认走 LibreTranslate 公开 API（100+ 种语言），3 个公开实例自动 fallback，单个挂了不会崩。
 **零第三方依赖**，urllib + json 搞定。

@@ -23,12 +23,12 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.4.6                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译 ║
+║                    PyMsi  v1.4.7a1 (Alpha)                  ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译 | 邮件 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.4.6-py3-none-any.whl
+    pip install pymsi-1.4.7a1-py3-none-any.whl
 
 【快速开始】
 
@@ -123,6 +123,19 @@ _README = r"""
     #   a = PM.translate.output      输出当变量用 (译文)
     #   src/tgt = .source_lang/.target_lang  语言变量
     #   PM.translate.languages()     看支持的所有语言
+
+    # ─── 方式八：邮件发送 (验证码 / 通知, 内置发件 wns1@qq.com, 零依赖) ───
+    PM.dl.auth("QQ邮箱授权码")                # 1. 设授权码 (QQ邮箱设置→账户→SMTP生成)
+    PM.dl.output("user@example.com")          # 2. 设收件人 (Gmail/Outlook/163/QQ都行)
+    PM.dl.print("你的验证码是 123456")          # 3. 发送邮件内容
+    #   PM.dl.send_code()                     一键: 自动生成6位码 + 拼正文 + 发邮件
+    #   print(PM.dl.code)                      拿到刚生成的验证码做比对
+    # ↑ 等价写法:
+    #   PM.dl / PM.mail / PM.email / PM.send / PM.smtp / PM.邮件 / PM.发邮件 都是同一模块
+    #   PM.dl.auth(码).output(邮箱).print(正文) 链式调用
+    #   to = PM.dl.output    收件人变量
+    #   body = PM.dl.input    上次邮件内容变量
+    #   code = PM.dl.code     上次生成的验证码变量
 
 ────────────────────────────────────────────────────────────
 【API 完整参考】
@@ -230,6 +243,32 @@ _README = r"""
 
   PM.translate == PM.Translate == PM.tr == PM.trans == PM.t == PM.translation == PM.translator == PM.翻译 == PM.译
   PM.translate.translate / to / 翻译 / trans / tr / t / do / run / go / make / convert / 转 / 翻  都是同一方法
+
+  PM.dl.auth(code)                         设 QQ 邮箱授权码 (不是登录密码!)
+    code: str                              QQ 邮箱设置→账户→SMTP 服务→生成授权码
+  PM.dl.output(email) / to / recipient / target / send_to / 收件人  设收件人
+  PM.dl.output = "a@b.com"                 直接赋值也行 (可读可写)
+  PM.dl.print(content)                     发送邮件 (内容自动 print 确认)
+    content: str                           邮件正文 (空字符串会弹 input() 交互)
+  PM.dl.send_code(length=6)               一键: 生成 6 位验证码 + 拼正文 + 发邮件
+  PM.dl.gen_code(length=6)                 只生成验证码不发邮件, 返回码字符串
+  PM.dl.subject = "..."                    设邮件主题 (默认 "PyMsi 验证码")
+  PM.dl.from_name(name)                   设发件人显示名 (默认 "PyMsi")
+  PM.dl.clear() / reset()                  清空所有缓存 (含授权码)
+
+  PM.dl.output / Output / to_email / recipient_email / receiver / target_email  收件人 (只读)
+  PM.dl.input / Input / content / body / text / message / mail_body             上次邮件正文 (只读)
+  PM.dl.code / Code / verify_code / verification_code / captcha / otp            上次验证码 (只读)
+  PM.dl.subject                                邮件主题 (可读可写)
+  PM.dl.status / Status / result               上次发送结果信息 (只读)
+  PM.dl.last_error                             上次错误 (无错为空字符串)
+
+  PM.dl.print / send / deliver / emit / 发送 / 发邮件 / mail / email  都是同一方法
+  PM.dl.send_code / code_ / verify / send_otp / send_captcha / 验证码 / 发验证码 / 发码  都是同一方法
+  PM.dl.auth / authcode / apikey / token / password / set_auth   设授权码别名
+
+  PM.dl == PM.Dl == PM.mail == PM.Mail == PM.email == PM.Email == PM.deliver
+         == PM.send == PM.smtp == PM.邮件 == PM.邮箱 == PM.发邮件
 
 ────────────────────────────────────────────────────────────
 【图片 → 字体 TTF 用法示例】
@@ -920,6 +959,7 @@ from .image import _ImageModule
 from .hex import _HexModule
 from .ai import _AIModule
 from .translate import _TranslateModule
+from .mail import _MailModule
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -954,6 +994,7 @@ class _PyMsi:
         self._hex_module = _HexModule()
         self._ai_module = _AIModule()
         self._translate_module = _TranslateModule()
+        self._mail_module = _MailModule()
 
     def __call__(self, path):
         """
@@ -1355,6 +1396,86 @@ class _PyMsi:
         """别名: PM.译 = PM.translate"""
         return self._translate_module
 
+    @property
+    def dl(self):
+        """
+        邮件子模块 — 发送验证码 / 通知邮件 (内置发件 wns1@qq.com, 零依赖)
+
+        用法:
+            PM.dl.auth("QQ邮箱授权码")              # 1. 设授权码 (QQ邮箱设置里开启SMTP生成)
+            PM.dl.output("user@gmail.com")          # 2. 设收件人 (任意邮箱都行)
+            PM.dl.print("你的验证码是 123456")       # 3. 发送邮件
+
+            # 一键发送验证码 (自动生成 6 位码 + 拼正文 + 发邮件)
+            PM.dl.send_code()
+            print(PM.dl.code)                       # 拿到刚生成的验证码做比对
+
+            # 输入输出都当变量用
+            to = PM.dl.output                       # 收件人邮箱
+            body = PM.dl.input                       # 上次发送的邮件内容
+            code = PM.dl.code                        # 上次生成的验证码
+
+            # 链式: PM.dl.auth(码).output(邮箱).print(正文)
+            # PM.dl / PM.mail / PM.email / PM.send / PM.邮件 / PM.发送 都是同一模块
+        """
+        return self._mail_module
+
+    # dl 子模块别名
+    @property
+    def Dl(self):
+        """别名: PM.Dl = PM.dl"""
+        return self._mail_module
+
+    @property
+    def mail(self):
+        """别名: PM.mail = PM.dl"""
+        return self._mail_module
+
+    @property
+    def Mail(self):
+        """别名: PM.Mail = PM.dl"""
+        return self._mail_module
+
+    @property
+    def email(self):
+        """别名: PM.email = PM.dl"""
+        return self._mail_module
+
+    @property
+    def Email(self):
+        """别名: PM.Email = PM.dl"""
+        return self._mail_module
+
+    @property
+    def deliver(self):
+        """别名: PM.deliver = PM.dl"""
+        return self._mail_module
+
+    @property
+    def send(self):
+        """别名: PM.send = PM.dl"""
+        return self._mail_module
+
+    @property
+    def smtp(self):
+        """别名: PM.smtp = PM.dl"""
+        return self._mail_module
+
+    @property
+    def 邮件(self):
+        """别名: PM.邮件 = PM.dl"""
+        return self._mail_module
+
+    @property
+    def 邮箱(self):
+        """别名: PM.邮箱 = PM.dl"""
+        return self._mail_module
+
+    @property
+    def 发邮件(self):
+        """别名: PM.发邮件 = PM.dl"""
+        return self._mail_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -1373,7 +1494,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.4.6"
+PM.__version__ = "1.4.7a1"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
