@@ -1,11 +1,11 @@
 # PyMsi
 
-**文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译(100+语) | 邮件(验证码) | 全别名语法**
+**文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译(100+语) | 邮件(验证码) | 文件串🧶 | 全别名语法**
 
 ## 安装
 
 ```bash
-pip install https://github.com/ZeroAnNull/PyMsi/releases/download/v1.4.8-snapshot-Bug/pymsi-1.4.8+snapshot.bug-py3-none-any.whl
+pip install https://github.com/ZeroAnNull/PyMsi/releases/download/v1.4.8/pymsi-1.4.8-py3-none-any.whl
 ```
 
 ## 快速开始
@@ -48,7 +48,7 @@ q = PM.translate.input                         # 原文
 a = PM.translate.output                        # 译文
 ```
 
-## 邮件模块 (v1.4.8-snapshot-Bug 🐛Bug版)
+## 邮件模块 (v1.4.8)
 
 内置发件邮箱 `wns1@qq.com`（PyMsi 官方），用户告诉它授权码 + 收件人 + 内容，就能发邮件。
 **零第三方依赖**，纯 Python 标准库 `smtplib` + `email`。
@@ -93,6 +93,38 @@ PM.dl.clear()
 - `.output(email)` 别名: `.to() / .recipient() / .target() / .send_to() / .收件人()`
 - `.print(content)` 别名: `.send() / .deliver() / .emit() / .发送() / .发邮件() / .mail() / .email()`
 - `.send_code()` 别名: `.verify() / .send_otp() / .send_captcha() / .验证码() / .发验证码() / .发码()`
+
+## 文件串模块 (v1.4.8 新增) 🧶
+
+像毛线球一样把文件串在一起：把文件一个一个挂在线上面，揉成一个毛线球，变成一个文件。
+类似支链蛋白，每个文件是一个"节点"，串在一条链上。
+
+```python
+# 串文件 — 把多个文件揉成一个毛线球 (.yarn)
+PM.filechain("a.txt", "b.png", "c.py")           # → output.yarn
+PM.filechain.to("我的球.yarn", "a.txt", "b.png")  # → 指定输出名
+
+# 看毛线球里有什么
+PM.filechain.list("我的球.yarn")                   # 列出所有文件及大小
+
+# 拆毛线球 — 把文件抽出来
+PM.filechain.un("我的球.yarn")                     # 全部解到当前目录
+PM.filechain.un("我的球.yarn", "a.txt")            # 只解指定文件
+PM.filechain.un("我的球.yarn", output="./out")     # 解到指定目录
+
+# 合并毛线球 — 两个球揉成一个
+PM.filechain.merge("a.yarn", "b.yarn", "merged.yarn")
+
+# 输入输出当变量用
+files = PM.filechain.input                         # 上次串入的文件列表
+ball = PM.filechain.output                         # 上次生成的毛线球路径
+```
+
+**模块别名**（怎么写都行）：
+- `PM.filechain == PM.fc == PM.chain == PM.yarn == PM.文件串 == PM.毛线球`
+- `.list()` 别名: `.ls() / .all() / .show()`
+- `.un()` 别名: `.unwrap() / .extract() / .unpack()`
+- 中文方法: `.串() / .拆() / .看() / .合并()`
 
 ## 翻译模块 (v1.4.6)
 
@@ -206,27 +238,11 @@ PM.ai.clear()                               # 清空对话历史 + 输入 + 输�
 
 ## 别名语法
 
-全模块支持别名，怎么写都行：`PM.b("path")` `PM.h("html")` `PM.g("Snake")` `PM.i("glyphs","out.ttf")` `PM.font(...)` `PM.hd("file.bin")` `PM.ai("你好")` `PM.tr("你好")` `PM.translate.en("你好")` `PM.html.win()` ...
+全模块支持别名，怎么写都行：`PM.b("path")` `PM.h("html")` `PM.g("Snake")` `PM.i("glyphs","out.ttf")` `PM.font(...)` `PM.hd("file.bin")` `PM.ai("你好")` `PM.tr("你好")` `PM.translate.en("你好")` `PM.fc("a.txt","b.txt")` `PM.html.win()` ...
 
+## 来聊天
+- 遇到 bug？[提 Issue](https://github.com/ZeroAnNull/PyMsi/issues)
+- 有想法或建议？[开 Discussion](https://github.com/ZeroAnNull/PyMsi/discussions)
+- 单纯想夸我？点个 Star 就行，求求了！
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-##💬来聊天
-- 遇到bug？[提Issue]
-- 有想法或建议？[开Discussion]
-- 单纯想夸我？ 点个⭐就行，求求了！
-！[吉祥物-我是彩蛋](这是我家吉祥物.jpg)
+![吉祥物-我是彩蛋](这是我家吉祥物.jpg)

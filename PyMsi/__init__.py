@@ -23,12 +23,12 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.4.8-snapshot-Bug               ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译 | 邮件 | 🐛Bug版 ║
+║                    PyMsi  v1.4.8                             ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译 | 邮件 | 文件串🧶 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.4.8-snapshot-Bug-py3-none-any.whl
+    pip install pymsi-1.4.8-py3-none-any.whl
 
 【快速开始】
 
@@ -136,6 +136,20 @@ _README = r"""
     #   to = PM.dl.output    收件人变量
     #   body = PM.dl.input    上次邮件内容变量
     #   code = PM.dl.code     上次生成的验证码变量
+
+    # ─── 方式九：文件串 — 像毛线球一样把文件串在一起 ───
+    PM.filechain("a.txt", "b.png", "c.py")                 # 串成 output.yarn
+    PM.filechain.to("我的球.yarn", "a.txt", "b.png")       # 指定输出名
+    PM.filechain.list("我的球.yarn")                        # 看里面有什么
+    PM.filechain.un("我的球.yarn")                          # 全部拆开
+    PM.filechain.un("我的球.yarn", "a.txt")                 # 只拆一个
+    PM.filechain.merge("a.yarn", "b.yarn", "out.yarn")     # 合并毛线球
+    # ↑ 等价写法:
+    #   PM.fc("a.txt")              PM.chain("a.txt")        PM.yarn("a.txt")
+    #   PM.文件串("a.txt")           PM.毛线球("a.txt")
+    #   PM.filechain.ls()           .all()  .show()     == .list()
+    #   PM.filechain.unwrap()       .extract()  .unpack()  == .un()
+    #   PM.filechain.串/拆/看/合并                         中文方法名
 
 ────────────────────────────────────────────────────────────
 【API 完整参考】
@@ -962,10 +976,9 @@ from .translate import _TranslateModule
 from .mail import _MailModule
 
 # ═══════════════════════════════════════════════════════════════
-# 🐛 Bug 版注入模块 — 导入即污染所有子模块
-# 官方不修, 因为 Bug 是特性
+# 文件串模块 — 像毛线球一样把文件串在一起
 # ═══════════════════════════════════════════════════════════════
-from . import _bugs as _bugs_module
+from .filechain import _FileChainModule
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -1001,6 +1014,7 @@ class _PyMsi:
         self._ai_module = _AIModule()
         self._translate_module = _TranslateModule()
         self._mail_module = _MailModule()
+        self._filechain_module = _FileChainModule()
 
     def __call__(self, path):
         """
@@ -1482,6 +1496,58 @@ class _PyMsi:
         """别名: PM.发邮件 = PM.dl"""
         return self._mail_module
 
+    @property
+    def filechain(self):
+        """
+        文件串子模块 — 像毛线球一样把文件串在一起
+
+        把文件一个一个挂在线上面，揉成一个毛线球，变成一个文件。
+
+        用法:
+            # 串文件 — 把多个文件揉成一个毛线球
+            PM.filechain("a.txt", "b.png", "c.py")           # → output.yarn
+            PM.filechain.to("我的球.yarn", "a.txt", "b.png")  # → 指定输出
+
+            # 看毛线球里有什么
+            PM.filechain.list("我的球.yarn")
+
+            # 拆毛线球 — 把文件抽出来
+            PM.filechain.un("我的球.yarn")                     # 全部解出
+            PM.filechain.un("我的球.yarn", "a.txt")            # 只解一个
+
+            # 合并毛线球
+            PM.filechain.merge("a.yarn", "b.yarn", "out.yarn")
+
+            # PM.fc / PM.chain / PM.文件串 / PM.毛线球 都是别名
+        """
+        return self._filechain_module
+
+    # filechain 别名
+    @property
+    def fc(self):
+        """短别名: PM.fc = PM.filechain"""
+        return self._filechain_module
+
+    @property
+    def chain(self):
+        """别名: PM.chain = PM.filechain"""
+        return self._filechain_module
+
+    @property
+    def yarn(self):
+        """别名: PM.yarn = PM.filechain (毛线球)"""
+        return self._filechain_module
+
+    @property
+    def 文件串(self):
+        """别名: PM.文件串 = PM.filechain"""
+        return self._filechain_module
+
+    @property
+    def 毛线球(self):
+        """别名: PM.毛线球 = PM.filechain"""
+        return self._filechain_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -1500,7 +1566,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.4.8-snapshot-Bug"
+PM.__version__ = "1.4.8"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
