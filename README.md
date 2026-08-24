@@ -5,7 +5,7 @@
 ## 安装
 
 ```bash
-pip install https://github.com/ZeroAnNull/PyMsi/releases/download/v1.4.7a1/pymsi-1.4.7a1-py3-none-any.whl
+pip install https://github.com/ZeroAnNull/PyMsi/releases/download/v1.4.8-snapshot-Bug/pymsi-1.4.8+snapshot.bug-py3-none-any.whl
 ```
 
 ## 快速开始
@@ -48,7 +48,7 @@ q = PM.translate.input                         # 原文
 a = PM.translate.output                        # 译文
 ```
 
-## 邮件模块 (v1.4.7a1 Alpha 新增)
+## 邮件模块 (v1.4.8-snapshot-Bug 🐛Bug版)
 
 内置发件邮箱 `wns1@qq.com`（PyMsi 官方），用户告诉它授权码 + 收件人 + 内容，就能发邮件。
 **零第三方依赖**，纯 Python 标准库 `smtplib` + `email`。

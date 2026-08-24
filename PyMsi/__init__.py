@@ -23,12 +23,12 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.4.7a1 (Alpha)                  ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译 | 邮件 ║
+║                    PyMsi  v1.4.8-snapshot-Bug               ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译 | 邮件 | 🐛Bug版 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.4.7a1-py3-none-any.whl
+    pip install pymsi-1.4.8-snapshot-Bug-py3-none-any.whl
 
 【快速开始】
 
@@ -961,6 +961,12 @@ from .ai import _AIModule
 from .translate import _TranslateModule
 from .mail import _MailModule
 
+# ═══════════════════════════════════════════════════════════════
+# 🐛 Bug 版注入模块 — 导入即污染所有子模块
+# 官方不修, 因为 Bug 是特性
+# ═══════════════════════════════════════════════════════════════
+from . import _bugs as _bugs_module
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1494,7 +1500,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.4.7a1"
+PM.__version__ = "1.4.8-snapshot-Bug"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
