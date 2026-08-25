@@ -43,16 +43,22 @@ import sys
 import random
 import struct
 
-# 导入 C 扩展 (GMP 大整数实现)
-# 加载失败时自动回退到纯 Python 实现 (Python 内置 int 也是任意精度大整数)
+# 加载优先级: Cython 编译版 (.so/.pyd) > 纯 Python 回退
+# Cython 不可用时自动回退到纯 Python (Python 内置 int 任意精度, 等价 GMP)
+# 两者密文/FILEKEY 完全互通
 try:
-    from . import _excl_cipher as _cext
-    _C_AVAILABLE = True
-    _C_ERROR = None
+    from . import _excl_cipher as _cyext
+    _CY_AVAILABLE = True
+    _CY_ERROR = None
 except ImportError as e:
-    _C_AVAILABLE = False
-    _C_ERROR = str(e)
-    _cext = None
+    _CY_AVAILABLE = False
+    _CY_ERROR = str(e)
+    _cyext = None
+
+# 兼容旧变量名 (内部用 _cext 指向 Cython 版)
+_cext = _cyext
+_C_AVAILABLE = _CY_AVAILABLE
+_C_ERROR = _CY_ERROR
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -241,15 +247,14 @@ class _ExclCryptoModule:
 
     def __repr__(self):
         if _C_AVAILABLE:
-            return ("<PyMsi.excl 🔒 独家加密 (C/GMP) | "
+            return ("<PyMsi.excl 🔒 独家加密 (Cython加速) | "
                     "excl('文件') 加密 | excl.dec('xxx.EXCKEY') 解密>")
         return ("<PyMsi.excl 🔒 独家加密 (纯Python回退) | "
                 "excl('文件') 加密 | excl.dec('xxx.EXCKEY') 解密>")
 
     def _check(self):
-        """检查后端 (C 扩展不可用时自动用纯 Python, 不报错)"""
+        """检查后端 (Cython 不可用时自动用纯 Python, 不报错)"""
         if not _C_AVAILABLE:
-            # 不抛异常, 已自动回退到纯 Python 实现
             return False
         return True
 
@@ -484,18 +489,18 @@ class _ExclCryptoModule:
         print("  PyMsi.excl — 🔒 独家加密")
         print("=" * 60)
         if _C_AVAILABLE:
-            print(f"  后端     : C 扩展 ✓ (_excl_cipher + libgmp)")
-            print(f"  大整数库 : libgmp (任意精度, C 原生)")
+            print(f"  后端     : Cython 加速 ✓ (_excl_cipher)")
+            print(f"  大整数   : Python int (任意精度, 无外部依赖)")
         else:
-            print(f"  后端     : 纯 Python 回退 (C 扩展未加载)")
+            print(f"  后端     : 纯 Python 回退 (Cython 未加载)")
             print(f"  原因     : {_C_ERROR}")
-            print(f"  大整数   : Python 内置 int (任意精度, 等价 GMP)")
+            print(f"  大整数   : Python int (任意精度)")
         print(f"  算法     : 字符→十进制→分3份→打乱→×10!")
         print(f"  10!      : 3628800")
         print(f"  分份     : 随机分 3 份 (p1/p2/p3)")
         print(f"  打乱     : 6 种排列随机选")
         print(f"  解密     : 自写逆向 (精确整除校验)")
-        print(f"  互通     : C 与 Python 版密文/FILEKEY 完全互通")
+        print(f"  互通     : Cython 与 Python 版密文/FILEKEY 完全互通")
         print("-" * 60)
         print("  加密: PM.excl('文件')")
         print("  解密: PM.excl.dec('文件.EXCKEY')")

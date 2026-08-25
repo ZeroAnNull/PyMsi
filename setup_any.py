@@ -1,11 +1,14 @@
-"""纯 Python 通用 wheel 打包配置 (无 C 扩展)
+"""纯 Python 通用 wheel 打包配置 (不编 Cython 扩展)
 
 用法:
     python3 setup_any.py bdist_wheel
 
 生成 py3-none-any.whl, 所有平台 (Win/Mac/Linux) 都能装
-运行时 exclcrypto.py 找不到 C 扩展会自动回退到纯 Python 实现
-(Python 内置 int 任意精度大整数, 等价 GMP, 功能完全一致)
+- 不含编译的 .so/.pyd (避免平台依赖)
+- 含 _excl_cipher.pyx 源代码 (用户可自行 cythonize 加速)
+- 运行时自动用纯 Python 回退 (Python 内置 int 任意精度, 等价 GMP)
+
+这是给 Windows/macOS 等没有 C 加速 wheel 平台的通用版。
 """
 from setuptools import setup, find_packages
 
@@ -18,7 +21,7 @@ setup(
     python_requires=">=3.7",
     # 不编 C 扩展 → py3-none-any (所有平台通用)
     # 独家加密运行时自动用纯 Python 回退 (Python 内置 int 任意精度)
-    package_data={"PyMsi": ["_excl_cipher.c"]},  # 仍随附 C 源代码
+    package_data={"PyMsi": ["_excl_cipher.pyx"]},  # 随附 Cython 源码
     include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -28,7 +31,7 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
-        "Programming Language :: C",
+        "Programming Language :: Cython",
         "Topic :: Security :: Cryptography",
         "Topic :: Software Development :: Build Tools",
         "Topic :: System :: Software Distribution",
