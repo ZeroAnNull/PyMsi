@@ -23,12 +23,12 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║               PyMsi  v1.4.8+snapshot4  (snapshot-4)          ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译 | 邮件 | 文件串🧶 ║
+║                    PyMsi  v1.4.9                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey加密 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.4.8_snapshot4-py3-none-any.whl
+    pip install pymsi-1.4.9-py3-none-any.whl
 
 【快速开始】
 
@@ -980,6 +980,11 @@ from .mail import _MailModule
 # ═══════════════════════════════════════════════════════════════
 from .filechain import _FileChainModule
 
+# ═══════════════════════════════════════════════════════════════
+# KeyKey 加密模块 — AES/RSA/ECC 三合一, 512位, Unicode17.0
+# ═══════════════════════════════════════════════════════════════
+from .keykey import _KeyKeyModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1015,6 +1020,7 @@ class _PyMsi:
         self._translate_module = _TranslateModule()
         self._mail_module = _MailModule()
         self._filechain_module = _FileChainModule()
+        self._keykey_module = _KeyKeyModule()
 
     def __call__(self, path):
         """
@@ -1548,6 +1554,51 @@ class _PyMsi:
         """别名: PM.毛线球 = PM.filechain"""
         return self._filechain_module
 
+    @property
+    def keykey(self):
+        """
+        🔐 KeyKey 三合一强加密 (AES / RSA / ECC 合一)
+
+        密钥不可能破解: Unicode 17.0 全字符 + 512 位 + PBKDF2-HMAC-SHA512
+
+        用法:
+            # 加密 (选文件 + 选类型)
+            PM.keykey("secret.txt", mode="AES")      # AES 风格
+            PM.keykey("secret.txt", mode="RSA")      # RSA 风格
+            PM.keykey("secret.txt", mode="ECC")      # ECC 风格
+            PM.keykey("secret.txt", mode="HYBRID")   # 三合一, 最强
+            # → 生成 secret.txt.keykey (加密文件) + secret.txt.FILEKEY (密钥)
+
+            # 解密 (选中 FILEKEY, 自动检测)
+            PM.keykey.dec("secret.txt.FILEKEY")      # 自动找到并解密
+
+            # 设额外密码 (可选, 让密钥更强)
+            PM.keykey("secret.txt", mode="HYBRID", password="我的密码")
+            PM.keykey.dec("secret.txt.FILEKEY", password="我的密码")
+        """
+        return self._keykey_module
+
+    # keykey 别名
+    @property
+    def KeyKey(self):
+        """别名: PM.KeyKey = PM.keykey"""
+        return self._keykey_module
+
+    @property
+    def crypto(self):
+        """别名: PM.crypto = PM.keykey"""
+        return self._keykey_module
+
+    @property
+    def encrypt(self):
+        """别名: PM.encrypt = PM.keykey (加密模块)"""
+        return self._keykey_module
+
+    @property
+    def 加密(self):
+        """别名: PM.加密 = PM.keykey"""
+        return self._keykey_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -1566,7 +1617,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.4.8+snapshot4"
+PM.__version__ = "1.4.9"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
