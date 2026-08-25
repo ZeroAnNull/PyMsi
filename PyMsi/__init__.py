@@ -23,12 +23,12 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║               PyMsi  v1.4.8+snapshot3  (snapshot-3)          ║
+║               PyMsi  v1.4.8+snapshot4  (snapshot-4)          ║
 ║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译 | 邮件 | 文件串🧶 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.4.8_snapshot3-py3-none-any.whl
+    pip install pymsi-1.4.8_snapshot4-py3-none-any.whl
 
 【快速开始】
 
@@ -1566,7 +1566,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.4.8+snapshot3"
+PM.__version__ = "1.4.8+snapshot4"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name

@@ -344,6 +344,10 @@ class _MailModule:
         Returns:
             self (链式调用; 验证码存到 PM.dl.code)
         """
+        # 校验长度 (<=0 会生成空码, 负数会抛 ValueError)
+        if not isinstance(length, int) or length < 1:
+            print(f"[PyMsi.dl] ⚠ 验证码长度 {length!r} 非法, 已重置为 6")
+            length = 6
         # 生成验证码 (数字 + 大写字母混合)
         chars = string.digits + string.ascii_uppercase
         # 去掉容易混淆的字符 0/O/1/I
@@ -371,6 +375,10 @@ class _MailModule:
     # ─── 生成验证码不发邮件 (用户自己处理) ───────────────
     def gen_code(self, length=6):
         """只生成验证码, 不发邮件 (存到 .code)"""
+        # 校验长度 (<=0 会生成空码, 负数会抛 ValueError)
+        if not isinstance(length, int) or length < 1:
+            print(f"[PyMsi.dl] ⚠ 验证码长度 {length!r} 非法, 已重置为 6")
+            length = 6
         chars = string.digits + string.ascii_uppercase
         chars = chars.replace("0", "").replace("O", "").replace("1", "").replace("I", "")
         self._code = "".join(random.choices(chars, k=length))
