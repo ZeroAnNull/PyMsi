@@ -163,6 +163,12 @@ class _HexModule:
         Returns:
             成功返回解析字节数, 失败返回 None
         """
+        # 0) 校验 bytes_per_line (0 或负数会导致 _dump_bytes 死循环)
+        if not isinstance(bytes_per_line, int) or bytes_per_line < 1:
+            print(f"[PyMsi.hex] ⚠ bytes_per_line={bytes_per_line!r} 非法, "
+                  f"已重置为 16")
+            bytes_per_line = 16
+
         # 1) 解析路径, 找到对应文件
         resolved = self._resolve_path(path)
         if resolved is None:
@@ -186,7 +192,7 @@ class _HexModule:
             with open(resolved, "rb") as f:
                 if start_offset:
                     f.seek(start_offset)
-                data = f.read(max_bytes) if max_bytes else f.read()
+                data = f.read(max_bytes) if max_bytes is not None else f.read()
         except OSError as e:
             print(f"[PyMsi.hex] ✗ 读取文件失败: {e}")
             return None
