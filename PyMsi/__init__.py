@@ -23,12 +23,16 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.4.9                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey加密 ║
+║                    PyMsi  v1.5.0                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密(C/GMP) ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.4.9-py3-none-any.whl
+    pip install pymsi-1.5.0-cp314-cp314-linux_x86_64.whl
+
+【1.5.0 新增】独家加密 (纯 C + GMP 大整数)
+    字符→十进制→分3份→打乱→×10! (3628800)
+    用户装 wheel 即用, 无需编译器
 
 【快速开始】
 
@@ -985,6 +989,12 @@ from .filechain import _FileChainModule
 # ═══════════════════════════════════════════════════════════════
 from .keykey import _KeyKeyModule
 
+# ═══════════════════════════════════════════════════════════════
+# 独家加密模块 — 纯 C + GMP 大整数 (1.5.0 新增)
+# 字符→十进制→分3份→打乱→×10! (3628800)
+# ═══════════════════════════════════════════════════════════════
+from .exclcrypto import _ExclCryptoModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1021,6 +1031,7 @@ class _PyMsi:
         self._mail_module = _MailModule()
         self._filechain_module = _FileChainModule()
         self._keykey_module = _KeyKeyModule()
+        self._excl_module = _ExclCryptoModule()
 
     def __call__(self, path):
         """
@@ -1599,6 +1610,40 @@ class _PyMsi:
         """别名: PM.加密 = PM.keykey"""
         return self._keykey_module
 
+    @property
+    def excl(self):
+        """
+        🔒 独家加密 (纯 C + GMP 大整数, 1.5.0 新增)
+
+        算法: 字符→十进制→分3份→随机打乱→×10! (3628800)
+        实现: PyMsi/_excl_cipher.c (libgmp 任意精度大整数)
+        用户装 wheel 即用, 无需编译器
+
+        用法:
+            # 加密文件
+            PM.excl("secret.txt")
+            # → 生成 secret.txt.excl (加密文件) + secret.txt.EXCKEY (密钥)
+
+            # 解密 (选中 EXCKEY, 自动检测)
+            PM.excl.dec("secret.txt.EXCKEY")
+
+            # 直接对字符串加密/解密
+            ct, fk = PM.excl.encrypt("机密内容")
+            pt = PM.excl.decrypt(ct, fk)
+        """
+        return self._excl_module
+
+    # excl 别名
+    @property
+    def 独家加密(self):
+        """别名: PM.独家加密 = PM.excl"""
+        return self._excl_module
+
+    @property
+    def exclusive(self):
+        """别名"""
+        return self._excl_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -1617,7 +1662,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.4.9"
+PM.__version__ = "1.5.0"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
