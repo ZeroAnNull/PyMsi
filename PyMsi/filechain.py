@@ -258,7 +258,7 @@ class _FileChainModule:
         elif target is not None:
             if os.path.isdir(target) or target.endswith("/") or target.endswith("\\"):
                 out_dir = target
-            elif target and not os.path.sep in target:
+            elif target and os.path.sep not in target:
                 extract_one = target
             else:
                 out_dir = os.path.dirname(target) or "."

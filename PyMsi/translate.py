@@ -163,7 +163,7 @@ def _resolve_lang(name):
         if k.lower() == s:
             return v
     # 已经是 code 了 (2-6 位字母含横杠)
-    return name
+    return s
 
 
 class _TranslateModule:
