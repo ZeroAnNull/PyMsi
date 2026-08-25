@@ -40,8 +40,11 @@
 
 import os
 import sys
+import random
+import struct
 
 # 导入 C 扩展 (GMP 大整数实现)
+# 加载失败时自动回退到纯 Python 实现 (Python 内置 int 也是任意精度大整数)
 try:
     from . import _excl_cipher as _cext
     _C_AVAILABLE = True
@@ -50,6 +53,175 @@ except ImportError as e:
     _C_AVAILABLE = False
     _C_ERROR = str(e)
     _cext = None
+
+
+# ═══════════════════════════════════════════════════════════════
+# 纯 Python 回退实现 (C 扩展不可用时用, 算法完全一致)
+# Python 内置 int 是任意精度大整数, 精度无限, 等价 GMP
+# ═══════════════════════════════════════════════════════════════
+
+_CODEPOINT_WIDTH = 7          # 每码点 7 位十进制
+_LEADING_MARK = "1"           # 前导标记
+_FACTORIAL_10 = 3628800       # 10! = 1×2×3×4×5×6×7×8×9×10
+_EXCKEY_MAGIC = b"EXCKEY01"
+_EXCKEY_VERSION = 1
+_FILEKEY_SIZE = 30
+
+# 6 种排列 (与 C 实现一致)
+_PERMS = [
+    (0, 1, 2), (0, 2, 1), (1, 0, 2),
+    (1, 2, 0), (2, 0, 1), (2, 1, 0),
+]
+
+
+def _py_encrypt(text):
+    """纯 Python 加密 (回退用, 算法同 C)"""
+    if not text:
+        raise ValueError("不能加密空字符串")
+
+    # 1) 每字符 → 7 位十进制, 前导 "1" 防前导零丢失
+    digits = _LEADING_MARK
+    for ch in text:
+        digits += f"{ord(ch):0{_CODEPOINT_WIDTH}d}"
+    digits_len = len(digits)
+
+    # 2) 随机分三份
+    if digits_len < 3:
+        p1 = digits_len // 3
+        p2 = digits_len // 3
+        p3 = digits_len - p1 - p2
+        if p3 == 0:
+            p3 = 1
+            p2 = max(0, p2 - 1)
+    else:
+        p1 = random.randint(1, digits_len // 2)
+        rest = digits_len - p1
+        if rest < 2:
+            p2, p3 = 1, rest - 1
+        else:
+            p2 = random.randint(1, rest // 2)
+            p3 = rest - p2
+    if p3 == 0:
+        if p2 > 1:
+            p2 -= 1; p3 = 1
+        elif p1 > 1:
+            p1 -= 1; p3 = 1
+
+    p_parts = [digits[0:p1], digits[p1:p1 + p2], digits[p1 + p2:p1 + p2 + p3]]
+    p_lens = [p1, p2, p3]
+
+    # 3) 随机排列
+    perm = random.randint(0, 5)
+
+    # 4) shuffled
+    order = _PERMS[perm]
+    shuffled = "".join(p_parts[order[k]] for k in range(3))
+
+    # 5) final = "1" + shuffled
+    final_str = _LEADING_MARK + shuffled
+
+    # 6) N × 10! (Python int 任意精度, 等价 GMP)
+    N = int(final_str)
+    result = N * _FACTORIAL_10
+    ct_str = str(result)
+
+    # 7) FILEKEY (与 C 二进制布局一致: 30 字节)
+    fk = bytearray(_FILEKEY_SIZE)
+    fk[0:8] = _EXCKEY_MAGIC
+    fk[8] = _EXCKEY_VERSION
+    struct.pack_into("<I", fk, 9, p1)
+    struct.pack_into("<I", fk, 13, p2)
+    struct.pack_into("<I", fk, 17, p3)
+    fk[21] = perm
+    struct.pack_into("<I", fk, 22, len(text))
+    cksum = p1 + p2 + p3 + perm + len(text) + _EXCKEY_VERSION
+    struct.pack_into("<I", fk, 26, cksum & 0xFFFFFFFF)
+
+    return ct_str, bytes(fk)
+
+
+def _py_decrypt(ct_str, filekey):
+    """纯 Python 解密 (回退用, 算法同 C)"""
+    if len(filekey) != _FILEKEY_SIZE:
+        raise ValueError("FILEKEY 长度错误")
+    if filekey[0:8] != _EXCKEY_MAGIC:
+        raise ValueError("FILEKEY 魔数不匹配 (不是有效的 EXCKEY)")
+    version = filekey[8]
+    if version != _EXCKEY_VERSION:
+        sys.stderr.write(f"[PyMsi.excl] 警告: FILEKEY 版本 {version} (当前 {_EXCKEY_VERSION})\n")
+    p1 = struct.unpack_from("<I", filekey, 9)[0]
+    p2 = struct.unpack_from("<I", filekey, 13)[0]
+    p3 = struct.unpack_from("<I", filekey, 17)[0]
+    perm = filekey[21]
+    char_count = struct.unpack_from("<I", filekey, 22)[0]
+    cksum_stored = struct.unpack_from("<I", filekey, 26)[0]
+
+    if perm >= 6:
+        raise ValueError("FILEKEY 损坏: perm 越界")
+    cksum_calc = p1 + p2 + p3 + perm + char_count + version
+    if cksum_calc != cksum_stored:
+        raise ValueError("FILEKEY 校验失败 (checksum 不匹配, 文件损坏)")
+    if char_count == 0:
+        raise ValueError("FILEKEY 损坏: char_count=0")
+
+    # N ÷ 10! (Python int 精确整除, 校验余数)
+    try:
+        N = int(ct_str)
+    except ValueError:
+        raise ValueError("密文不是有效的大整数")
+    if N < 0:
+        raise ValueError("密文不能是负数")
+    final_val, r = divmod(N, _FACTORIAL_10)
+    if r != 0:
+        raise ValueError("密文无效: 不能被 10! (3628800) 整除 (密文已损坏或被篡改)")
+
+    final_str = str(final_val)
+    if not final_str or final_str[0] != _LEADING_MARK:
+        raise ValueError("密文无效: 前导标记丢失 (密文与 FILEKEY 不配对)")
+    shuffled = final_str[1:]
+    shuffled_len_have = len(shuffled)
+
+    # 补零到应有长度
+    shuffled_len_want = p1 + p2 + p3
+    if shuffled_len_have < shuffled_len_want:
+        shuffled = "0" * (shuffled_len_want - shuffled_len_have) + shuffled
+    elif shuffled_len_have != shuffled_len_want:
+        raise ValueError("密文与 FILEKEY 长度不匹配 (数据损坏)")
+
+    # 按 perm 切三段, 反推 p1/p2/p3 原始顺序
+    order = _PERMS[perm]
+    p_lens = [p1, p2, p3]
+    seg_lens = [p_lens[order[k]] for k in range(3)]
+    segs = []
+    off = 0
+    for k in range(3):
+        segs.append(shuffled[off:off + seg_lens[k]])
+        off += seg_lens[k]
+    # p[order[k]] = segs[k]
+    p_parts = [None, None, None]
+    for k in range(3):
+        p_parts[order[k]] = segs[k]
+
+    # digits = p1 + p2 + p3
+    digits = "".join(p_parts)
+    if not digits or digits[0] != _LEADING_MARK:
+        raise ValueError("还原失败: 前导标记丢失")
+    cp_str = digits[1:]
+
+    if len(cp_str) % _CODEPOINT_WIDTH != 0:
+        raise ValueError("还原失败: 码点数据长度不是 7 的倍数 (数据损坏)")
+    num_cps = len(cp_str) // _CODEPOINT_WIDTH
+    if num_cps != char_count:
+        raise ValueError(f"还原失败: 码点数 {num_cps} 与 FILEKEY 记录的 {char_count} 不符")
+
+    # 每 7 位切一个码点 → chr
+    chars = []
+    for i in range(num_cps):
+        cp = int(cp_str[i * _CODEPOINT_WIDTH:(i + 1) * _CODEPOINT_WIDTH])
+        if cp > 0x10FFFF or (0xD800 <= cp <= 0xDFFF):
+            raise ValueError(f"非法 Unicode 码点 U+{cp:X}")
+        chars.append(chr(cp))
+    return "".join(chars)
 
 
 class _ExclCryptoModule:
@@ -71,16 +243,15 @@ class _ExclCryptoModule:
         if _C_AVAILABLE:
             return ("<PyMsi.excl 🔒 独家加密 (C/GMP) | "
                     "excl('文件') 加密 | excl.dec('xxx.EXCKEY') 解密>")
-        return ("<PyMsi.excl 🔒 独家加密 [C扩展未加载] | "
-                f"错误: {_C_ERROR}>")
+        return ("<PyMsi.excl 🔒 独家加密 (纯Python回退) | "
+                "excl('文件') 加密 | excl.dec('xxx.EXCKEY') 解密>")
 
     def _check(self):
+        """检查后端 (C 扩展不可用时自动用纯 Python, 不报错)"""
         if not _C_AVAILABLE:
-            raise RuntimeError(
-                f"独家加密 C 扩展未加载: {_C_ERROR}\n"
-                "可能原因: 系统缺少 libgmp (请安装 libgmp10 / libgmp-dev)\n"
-                "或 wheel 与当前平台不匹配"
-            )
+            # 不抛异常, 已自动回退到纯 Python 实现
+            return False
+        return True
 
     # ─── 字符串加密/解密 ─────────────────────────────────
     def encrypt(self, text):
@@ -92,10 +263,12 @@ class _ExclCryptoModule:
         Returns:
             (ciphertext_str, filekey_bytes)
         """
-        self._check()
         if not isinstance(text, str):
             text = str(text)
-        return _cext.encrypt(text)
+        # 优先用 C 扩展, 不可用则回退纯 Python
+        if _C_AVAILABLE:
+            return _cext.encrypt(text)
+        return _py_encrypt(text)
 
     def decrypt(self, ciphertext, filekey):
         """解密字符串 ← (密文, FILEKEY)
@@ -107,11 +280,11 @@ class _ExclCryptoModule:
         Returns:
             原文字符串
         """
-        self._check()
         if isinstance(filekey, str):
-            # 允许传 str (会编码), 但推荐 bytes
             filekey = filekey.encode("latin-1")
-        return _cext.decrypt(ciphertext, filekey)
+        if _C_AVAILABLE:
+            return _cext.decrypt(ciphertext, filekey)
+        return _py_decrypt(ciphertext, filekey)
 
     # ─── 文件加密/解密 ───────────────────────────────────
     def __call__(self, path, output=None):
@@ -308,19 +481,21 @@ class _ExclCryptoModule:
     def info(self):
         """显示模块信息"""
         print("=" * 60)
-        print("  PyMsi.excl — 🔒 独家加密 (C/GMP 大整数)")
+        print("  PyMsi.excl — 🔒 独家加密")
         print("=" * 60)
         if _C_AVAILABLE:
-            print(f"  C 扩展   : 已加载 ✓ (_excl_cipher)")
-            print(f"  大整数库 : libgmp (任意精度)")
+            print(f"  后端     : C 扩展 ✓ (_excl_cipher + libgmp)")
+            print(f"  大整数库 : libgmp (任意精度, C 原生)")
         else:
-            print(f"  C 扩展   : 未加载 ✗")
-            print(f"  错误     : {_C_ERROR}")
+            print(f"  后端     : 纯 Python 回退 (C 扩展未加载)")
+            print(f"  原因     : {_C_ERROR}")
+            print(f"  大整数   : Python 内置 int (任意精度, 等价 GMP)")
         print(f"  算法     : 字符→十进制→分3份→打乱→×10!")
         print(f"  10!      : 3628800")
         print(f"  分份     : 随机分 3 份 (p1/p2/p3)")
         print(f"  打乱     : 6 种排列随机选")
-        print(f"  解密     : 自写逆向 (GMP 精确整除)")
+        print(f"  解密     : 自写逆向 (精确整除校验)")
+        print(f"  互通     : C 与 Python 版密文/FILEKEY 完全互通")
         print("-" * 60)
         print("  加密: PM.excl('文件')")
         print("  解密: PM.excl.dec('文件.EXCKEY')")

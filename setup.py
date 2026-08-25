@@ -1,12 +1,24 @@
 from setuptools import setup, find_packages, Extension
+import sys
 
 # 独家加密 C 扩展 (GMP 大整数)
-# 编译成 .so, 用户装 wheel 即用, 无需编译器
+# 跨平台编译: Linux(.so) / Windows(.pyd) / macOS(.dylib)
+# 用户装 wheel 即用, 无需编译器
+if sys.platform == "win32":
+    # MSVC: /O2 优化, /W3 警告, 抑制不安全警告
+    extra_args = ["/O2", "/W3"]
+    # Windows 上 GMP 库叫 gmp (vcpkg) 或 libgmp-10
+    libs = ["gmp"]
+else:
+    # GCC/Clang (Linux/macOS)
+    extra_args = ["-O2", "-Wall"]
+    libs = ["gmp"]
+
 excl_cipher_ext = Extension(
     "PyMsi._excl_cipher",
     sources=["PyMsi/_excl_cipher.c"],
-    libraries=["gmp"],
-    extra_compile_args=["-O2", "-Wall"],
+    libraries=libs,
+    extra_compile_args=extra_args,
 )
 
 setup(
