@@ -40,6 +40,6 @@ setup(
         "Topic :: Security :: Cryptography",
         "Topic :: Software Development :: Build Tools",
         "Topic :: System :: Software Distribution",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     ],
 )
