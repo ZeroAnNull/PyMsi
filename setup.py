@@ -25,8 +25,8 @@ for ext in cython_exts:
 
 setup(
     name="PyMsi",
-    version="1.5.1",
-    description="文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 — 脚本式API",
+    version="1.5.2",
+    description="文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta(.㠖) — 脚本式API",
     author="PyMsi",
     packages=find_packages(),
     python_requires=">=3.7",
