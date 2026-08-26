@@ -14,11 +14,16 @@ from setuptools import setup, find_packages
 
 setup(
     name="PyMsi",
-    version="1.5.0",
-    description="文件夹→MSI | HTML→EXE(Electron) | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译(100+语) | 邮件 | 文件串🧶 | 🔐KeyKey加密 | 🔒独家加密(通用Python版) — 脚本式API，大量别名",
+    version="1.5.1",
+    description="文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 — 脚本式API",
     author="PyMsi",
     packages=find_packages(),
     python_requires=">=3.7",
+    install_requires=[
+        # 浏览器 JS 引擎 (QuickJS 绑定, PyPI 有各平台 wheel)
+        # 不可用时浏览器自动降级为只解析 HTML/CSS, 不执行 JS
+        "dukpy>=0.6",
+    ],
     # 不编 C 扩展 → py3-none-any (所有平台通用)
     # 独家加密运行时自动用纯 Python 回退 (Python 内置 int 任意精度)
     package_data={"PyMsi": ["_excl_cipher.pyx"]},  # 随附 Cython 源码

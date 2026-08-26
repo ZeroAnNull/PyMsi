@@ -23,16 +23,18 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.5.0                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex解析 | AI空壳 | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密(C/GMP) ║
+║                    PyMsi  v1.5.1                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.5.0-cp314-cp314-linux_x86_64.whl
+    pip install pymsi-1.5.1-py3-none-any.whl
 
-【1.5.0 新增】独家加密 (纯 C + GMP 大整数)
-    字符→十进制→分3份→打乱→×10! (3628800)
-    用户装 wheel 即用, 无需编译器
+【1.5.1 新增】
+    🌐 极简服务器 (类 Flask, 纯标准库): PM.server.port(8080).route('/').serve('Hi').start()
+    🌍 极简浏览器 (纯 Python, 不调系统 Chrome): PM.browser.open(HTML)
+        - 解析 HTML / CSS / 执行 JS (js2py)
+        - 适配 DOM API: getElementById / querySelector / console.log
 
 【快速开始】
 
@@ -990,10 +992,20 @@ from .filechain import _FileChainModule
 from .keykey import _KeyKeyModule
 
 # ═══════════════════════════════════════════════════════════════
-# 独家加密模块 — 纯 C + GMP 大整数 (1.5.0 新增)
+# 独家加密模块 — Cython + Python 通用 (1.5.0 新增)
 # 字符→十进制→分3份→打乱→×10! (3628800)
 # ═══════════════════════════════════════════════════════════════
 from .exclcrypto import _ExclCryptoModule
+
+# ═══════════════════════════════════════════════════════════════
+# 极简 Web 服务器模块 (1.5.1 新增) — 类 Flask, 纯标准库
+# ═══════════════════════════════════════════════════════════════
+from .server import _ServerModule
+
+# ═══════════════════════════════════════════════════════════════
+# 极简后台浏览器模块 (1.5.1 新增) — 纯 Python, 不调用系统 Chrome
+# ═══════════════════════════════════════════════════════════════
+from .browser import _BrowserModule
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -1032,6 +1044,8 @@ class _PyMsi:
         self._filechain_module = _FileChainModule()
         self._keykey_module = _KeyKeyModule()
         self._excl_module = _ExclCryptoModule()
+        self._server_module = _ServerModule()
+        self._browser_module = _BrowserModule()
 
     def __call__(self, path):
         """
@@ -1644,6 +1658,66 @@ class _PyMsi:
         """别名"""
         return self._excl_module
 
+    @property
+    def server(self):
+        """
+        🌐 极简 Web 服务器 (类 Flask, 纯标准库, 1.5.1 新增)
+
+        用法:
+            # 链式
+            PM.server.port(8080).route("/").serve("<h1>Hi</h1>").start()
+            PM.server.stop()
+
+            # Flask 装饰器
+            @PM.server.app.route("/")
+            def home(): return "<h1>Home</h1>"
+            PM.server.run(8080)
+
+            # 静态文件
+            PM.server.static("/", "./public").start(8080)
+        """
+        return self._server_module
+
+    # server 别名
+    @property
+    def http(self):
+        """别名: PM.http = PM.server"""
+        return self._server_module
+
+    @property
+    def web(self):
+        """别名: PM.web = PM.server"""
+        return self._server_module
+
+    @property
+    def 服务器(self):
+        """别名: PM.服务器 = PM.server"""
+        return self._server_module
+
+    @property
+    def browser(self):
+        """
+        🌍 极简后台浏览器 (纯 Python, 不调用系统 Chrome/Edge, 1.5.1 新增)
+
+        在后台打开 HTML, 解析 HTML + CSS + 执行 JS
+
+        用法:
+            PM.browser.open('<h1 id="t">Hi</h1>')
+            PM.browser.title
+            PM.browser.find('#t').text
+            PM.browser.eval('1+2')         # 3
+            PM.browser.close()
+
+            PM.browser.open_url('https://example.com')
+        """
+        return self._browser_module
+
+    # browser 别名
+    @property
+    def 浏览器(self):
+        """别名: PM.浏览器 = PM.browser"""
+        return self._browser_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -1662,7 +1736,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.5.0"
+PM.__version__ = "1.5.1"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
