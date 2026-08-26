@@ -20,7 +20,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Build Tools",
     "Topic :: System :: Software Distribution",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "License :: OSI Approved :: MIT License",
 ]
 
 [project.urls]
