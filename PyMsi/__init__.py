@@ -23,13 +23,18 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.5.1                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 ║
+║                    PyMsi  v1.5.3                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.5.1-py3-none-any.whl
-
+    pip install pymsi-1.5.3-py3-none-any.whl
+【1.5.3 新增】
+    📹 录屏 (纯自研, Win32 GDI 截屏 + AVI/GIF 编码器 + 30+格式)
+        PM.record()                          # 一键录屏 (1分钟, 4K, AVI, D:/Videos)
+        PM.record(duration=60, fmt="gif")    # 录制 GIF
+        PM.record.formats()                   # 查看 30+ 格式
+        自动隐藏控制台 → 后台静默录屏 → 录完输出路径
 【1.5.1 新增】
     🌐 极简服务器 (类 Flask, 纯标准库): PM.server.port(8080).route('/').serve('Hi').start()
     🌍 极简浏览器 (纯 Python, 不调系统 Chrome): PM.browser.open(HTML)
@@ -1012,6 +1017,12 @@ from .browser import _BrowserModule
 # ═══════════════════════════════════════════════════════════════
 from .shrinkzeta import _ShrinkZetaModule
 
+# ═══════════════════════════════════════════════════════════════
+# 录屏模块 (1.5.3 新增) — 纯自研 Win32 GDI 截屏 + AVI/GIF 编码器
+# 30+ 输出格式, 自动隐藏控制台, 默认 D:/Videos
+# ═══════════════════════════════════════════════════════════════
+from .recorder import _ScreenRecordModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1052,6 +1063,7 @@ class _PyMsi:
         self._server_module = _ServerModule()
         self._browser_module = _BrowserModule()
         self._shrink_module = _ShrinkZetaModule()
+        self._record_module = _ScreenRecordModule()
 
     def __call__(self, path):
         """
@@ -1769,6 +1781,84 @@ class _PyMsi:
         """别名: PM.压缩 = PM.shrink"""
         return self._shrink_module
 
+    @property
+    def record(self):
+        """
+        📹 录屏模块 (1.5.3 新增) — 纯自研, 自动隐藏控制台
+
+        纯手搓的屏幕录制:
+            - Win32 GDI 截屏 (ctypes, 零依赖)
+            - 纯 Python AVI 编码器 (RIFF 容器手写)
+            - 纯 Python GIF 动画编码器 (3-3-2 量化 + LZW 压缩)
+            - 30+ 输出格式 (纯自研 AVI/GIF + ffmpeg 转码)
+            - 自动隐藏控制台, 后台静默录制
+            - 默认 D:/Videos, 录完自动输出文件路径
+
+        用法:
+            # 一键录屏 (默认: 1分钟, 最高4K, AVI, D:/Videos)
+            PM.record()
+
+            # 自定义
+            PM.record(duration=60, resolution="4K", fmt="mp4")
+            PM.record(duration=30, fmt="gif", output_dir="D:/Videos")
+
+            # 分步配置
+            PM.record.duration = 60       # 录屏时长 (秒)
+            PM.record.resolution = "4K"   # 清晰度 (最高4K)
+            PM.record.format = "gif"      # 输出格式
+            PM.record.start()
+
+            # 查看支持的格式
+            PM.record.formats()           # 打印 30+ 格式列表
+
+            # 录完后的输出路径
+            print(PM.record.output)
+
+            # 别名: PM.rec / PM.capture / PM.录屏 / PM.录像
+        """
+        return self._record_module
+
+    # record 别名
+    @property
+    def rec(self):
+        """别名: PM.rec = PM.record"""
+        return self._record_module
+
+    @property
+    def capture(self):
+        """别名: PM.capture = PM.record"""
+        return self._record_module
+
+    @property
+    def screen(self):
+        """别名: PM.screen = PM.record"""
+        return self._record_module
+
+    @property
+    def screencast(self):
+        """别名: PM.screencast = PM.record"""
+        return self._record_module
+
+    @property
+    def screenrecord(self):
+        """别名: PM.screenrecord = PM.record"""
+        return self._record_module
+
+    @property
+    def 录屏(self):
+        """别名: PM.录屏 = PM.record"""
+        return self._record_module
+
+    @property
+    def 录像(self):
+        """别名: PM.录像 = PM.record"""
+        return self._record_module
+
+    @property
+    def 视频(self):
+        """别名: PM.视频 = PM.record"""
+        return self._record_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -1787,7 +1877,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.5.2"
+PM.__version__ = "1.5.3"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
