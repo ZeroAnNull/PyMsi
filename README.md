@@ -240,6 +240,77 @@ PM.ai.clear()                               # 清空对话历史 + 输入 + 输�
 
 全模块支持别名，怎么写都行：`PM.b("path")` `PM.h("html")` `PM.g("Snake")` `PM.i("glyphs","out.ttf")` `PM.font(...)` `PM.hd("file.bin")` `PM.ai("你好")` `PM.tr("你好")` `PM.translate.en("你好")` `PM.fc("a.txt","b.txt")` `PM.html.win()` ...
 
+## 录屏模块 (v1.5.3) 📹
+
+> ⚠️ **仅支持 Windows** — 截屏底层调用 Win32 GDI（`ctypes` → `user32` / `gdi32` / `kernel32`），在 macOS 和 Linux 上调用 `PM.record()` 会抛出 `RuntimeError`。
+>
+> 跨平台替代方案：macOS 用 `screencapture`，Linux 用 `ffmpeg -f x11grab`。
+
+纯手搓、纯自研，零第三方依赖：
+
+| 组件 | 实现 |
+|------|------|
+| 截屏 | Win32 GDI via `ctypes`（`BitBlt` + `GetDIBits`） |
+| AVI 编码 | 纯手写 RIFF/AVI 容器，无压缩 24-bit BGR |
+| GIF 编码 | 纯手写 GIF89a，3-3-2 量化 + LZW 压缩 |
+| 控制台隐藏 | `ShowWindow(SW_HIDE)` / `ShowWindow(SW_SHOW)` |
+| 30+ 格式转码 | 纯自研 AVI/GIF/BMP + ffmpeg 转码 |
+
+```python
+import PyMsi as PM
+
+# 一键录屏 (默认: 1分钟, 4K, AVI, D:/Videos)
+PM.record()                                   # 控制台自动隐藏 → 录屏 → 恢复 → 输出路径
+print(PM.record.output)                        # D:/Videos/PyMsi_Record_xxxx.avi
+
+# 自定义参数
+PM.record(duration=60, resolution="4K", fmt="gif")   # 录 1 分钟 4K GIF
+PM.record(duration=30, fmt="mp4", output_dir="E:/out") # 录 30 秒 MP4 (需 ffmpeg)
+
+# 分步配置
+PM.record.duration = 60
+PM.record.resolution = "1080p"
+PM.record.format = "mp4"
+PM.record.start()
+
+# 查看支持的 30+ 格式
+PM.record.formats()
+
+# 别名: PM.rec / PM.capture / PM.录屏 / PM.录像
+```
+
+**支持的清晰度**: `4K` / `2K` / `1440p` / `1080p` / `720p` / `480p` / `360p` / `native`
+
+**纯自研格式 (不需要 ffmpeg)**: `avi` / `gif` / `bmp`
+
+**ffmpeg 转码格式 (31 种)**: `mp4` / `mkv` / `webm` / `mov` / `flv` / `wmv` / `mpeg` / `ts` / `ogv` / `3gp` / `av1` / `vp9` / `hevc` 等
+
+## .meow 文件打包 (v1.5.4) 🐱
+
+把多个文件"揉成"一个 `.meow` 容器，同时吐出 `address.json`（每个文件的数字地址）。
+解包时提供 `address.json` 所在目录，自动提取所有文件到 `D:/Dist`。
+
+```python
+import PyMsi as PM
+
+# 打包: 揉成 .meow (同时在输出目录吐出 address.json)
+PM.meow.disteow(["a.txt", "b.png", "c.pdf"])
+# → D:/Meow/output.meow + D:/Meow/address.json
+# address.json 里每个文件有数字地址: 154.04.1.1:00000001
+
+# 解包: 提供 address.json 所在目录 → 提取所有文件
+PM.meow.undisteow("D:/Meow/")
+# → 读取 address.json → 从 .meow 提取所有文件到 D:/Dist
+
+# 列出 .meow 中的文件
+PM.meow.list("D:/Meow/")
+
+# 提取单个文件 (通过数字地址)
+PM.meow.extract("D:/Meow/", "154.04.1.1:00000001")
+
+# 别名: PM.cat / PM.揉 / PM.猫
+```
+
 ## 来聊天
 - 遇到 bug？[提 Issue](https://github.com/ZeroAnNull/PyMsi/issues)
 - 有想法或建议？[开 Discussion](https://github.com/ZeroAnNull/PyMsi/discussions)

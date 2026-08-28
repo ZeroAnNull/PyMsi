@@ -38,6 +38,7 @@ _README = r"""
         解包: 提供 address.json 目录 → 自动提取所有文件
 【1.5.3 新增】
     📹 录屏 (纯自研, Win32 GDI 截屏 + AVI/GIF 编码器 + 30+格式)
+        ⚠️ 仅支持 Windows! macOS/Linux 会报 RuntimeError
         PM.record()                          # 一键录屏 (1分钟, 4K, AVI, D:/Videos)
         PM.record(duration=60, fmt="gif")    # 录制 GIF
         PM.record.formats()                   # 查看 30+ 格式
@@ -1798,6 +1799,10 @@ class _PyMsi:
     def record(self):
         """
         📹 录屏模块 (1.5.3 新增) — 纯自研, 自动隐藏控制台
+
+        ⚠️ 仅支持 Windows! macOS/Linux 调用会抛 RuntimeError
+           截屏底层是 Win32 GDI (ctypes → user32/gdi32/kernel32)
+           macOS 替代: screencapture | Linux 替代: ffmpeg -f x11grab
 
         纯手搓的屏幕录制:
             - Win32 GDI 截屏 (ctypes, 零依赖)

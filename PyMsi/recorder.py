@@ -1,5 +1,10 @@
 """PyMsi.recorder — 📹 录屏模块 (纯自研, 1.5.3 新增)
 
+⚠️ 平台限制: 仅支持 Windows
+    截屏底层调用 Win32 GDI (ctypes → user32/gdi32/kernal32),
+    在 macOS 和 Linux 上调用 PM.record() 会抛出 RuntimeError。
+    macOS 用户请用 screencapture, Linux 用户请用 ffmpeg/x11grab。
+
 纯手搓、纯自研的屏幕录制功能:
     - Win32 GDI 截屏 (ctypes 调系统 API, 零第三方依赖)
     - 纯 Python AVI 编码器 (无压缩视频流, RIFF 容器手写)
@@ -32,7 +37,7 @@
     # 别名: PM.rec / PM.capture / PM.录屏 / PM.录像
 
 注意:
-    - 截屏用 Win32 GDI (ctypes), 仅支持 Windows
+    - ⚠️ 截屏用 Win32 GDI (ctypes), 仅支持 Windows (macOS/Linux 会报错)
     - AVI/GIF 编码纯手写, 不依赖任何第三方库
     - MP4/MKV/WebM 等格式需要 ffmpeg (自动检测, 有就用)
     - 录制时自动隐藏控制台, 录完自动恢复并输出路径
