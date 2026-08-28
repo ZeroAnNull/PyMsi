@@ -23,12 +23,19 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.5.3                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 ║
+║                    PyMsi  v1.5.4                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.5.3-py3-none-any.whl
+    pip install pymsi-1.5.4-py3-none-any.whl
+【1.5.4 新增】
+    🐱 .meow 文件打包/解包 (多文件揉成 .meow + address.json)
+        PM.meow.disteow(["a.txt", "b.png", "c.pdf"])  # 揉成 .meow
+        PM.meow.undisteow("D:/Meow/")                 # 提取所有文件到 D:/Dist
+        PM.meow.list("D:/Meow/")                      # 列出 .meow 中的文件
+        打包: 多文件 → .meow + address.json (数字地址 154.04.1.1:00000001)
+        解包: 提供 address.json 目录 → 自动提取所有文件
 【1.5.3 新增】
     📹 录屏 (纯自研, Win32 GDI 截屏 + AVI/GIF 编码器 + 30+格式)
         PM.record()                          # 一键录屏 (1分钟, 4K, AVI, D:/Videos)
@@ -1023,6 +1030,11 @@ from .shrinkzeta import _ShrinkZetaModule
 # ═══════════════════════════════════════════════════════════════
 from .recorder import _ScreenRecordModule
 
+# ═══════════════════════════════════════════════════════════════
+# .meow 文件打包/解包模块 (1.5.4 新增) — 揉成 .meow + address.json
+# ═══════════════════════════════════════════════════════════════
+from .meow import _MeowModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1064,6 +1076,7 @@ class _PyMsi:
         self._browser_module = _BrowserModule()
         self._shrink_module = _ShrinkZetaModule()
         self._record_module = _ScreenRecordModule()
+        self._meow_module = _MeowModule()
 
     def __call__(self, path):
         """
@@ -1859,6 +1872,50 @@ class _PyMsi:
         """别名: PM.视频 = PM.record"""
         return self._record_module
 
+    @property
+    def meow(self):
+        """
+        🐱 .meow 文件打包/解包模块 (1.5.4 新增)
+
+        把多个文件揉成一个 .meow, 同时吐出 address.json
+        address.json 存着每个文件的数字地址 (154.04.1.1:数字地址)
+        解包时提供 address.json 所在目录, 提取所有文件到 D:/Dist
+
+        用法:
+            # 打包 (揉成 .meow)
+            PM.meow.disteow(["a.txt", "b.png", "c.pdf"])
+            # → D:/Meow/output.meow + D:/Meow/address.json
+
+            # 自定义输出路径
+            PM.meow.disteow(["a.txt", "b.png"], output="E:/test/data.meow")
+
+            # 解包 (从 .meow 取出所有文件)
+            PM.meow.undisteow("D:/Meow/")    # 提供 address.json 所在目录
+            # → 读取 address.json → 提取所有文件到 D:/Dist
+
+            # 列出 .meow 中的文件
+            PM.meow.list("D:/Meow/")
+
+            # 别名: PM.cat / PM.揉 / PM.猫
+        """
+        return self._meow_module
+
+    # meow 别名
+    @property
+    def cat(self):
+        """别名: PM.cat = PM.meow"""
+        return self._meow_module
+
+    @property
+    def 揉(self):
+        """别名: PM.揉 = PM.meow"""
+        return self._meow_module
+
+    @property
+    def 猫(self):
+        """别名: PM.猫 = PM.meow"""
+        return self._meow_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -1877,7 +1934,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.5.3"
+PM.__version__ = "1.5.4"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
