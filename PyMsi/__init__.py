@@ -23,12 +23,26 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.5.5                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 ║
+║                    PyMsi  v1.5.6                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.5.5-py3-none-any.whl
+    pip install pymsi-1.5.6-py3-none-any.whl
+【1.5.6 新增】
+    📦 .nano 容器 (四级权限分区存储, 纯自研)
+        比压缩包更安全: 权限制度 + 校验 + 分区加密
+        4个分区 (从低到高):
+          normal     普通区域, 无需任何权限
+          adminanorobit (Anon2) 管理员级, 需 admin/sudo
+          asoav1     (Dona0/高泉区) 内核级, 需 SYSTEM/root
+          nanou      最高权限区, 需 .nnu 脚本 (语法公开)
+        PM.nano.create("data.nano", anon2_pw="admin123", ...)
+        PM.nano.add("data.nano", "normal", "a.txt")
+        PM.nano.extract("data.nano", "normal", "D:/out")
+        PM.nano.run_nnu("extract.nnu")       # Nanou 区: 执行 .nnu 脚本
+        PM.nano.nnu_help()                    # 查看 .nnu 公开语法
+        别名: PM.container / PM.容器 / PM.纳米
 【1.5.5 新增】
     🔐 进程权限提升 (以特定权限打开进程)
         ⚠️ 需要管理员(Win)/sudo(Linux), 不能绕过认证!
@@ -1052,6 +1066,11 @@ from .meow import _MeowModule
 # ═══════════════════════════════════════════════════════════════
 from .priv import _PrivModule
 
+# ═══════════════════════════════════════════════════════════════
+# .nano 容器模块 (1.5.6 新增) — 四级权限分区存储
+# ═══════════════════════════════════════════════════════════════
+from .nano import _NanoModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1095,6 +1114,7 @@ class _PyMsi:
         self._record_module = _ScreenRecordModule()
         self._meow_module = _MeowModule()
         self._priv_module = _PrivModule()
+        self._nano_module = _NanoModule()
 
     def __call__(self, path):
         """
@@ -1997,6 +2017,57 @@ class _PyMsi:
         """别名: PM.权限 = PM.priv"""
         return self._priv_module
 
+    @property
+    def nano(self):
+        """
+        📦 .nano 容器模块 (1.5.6 新增) — 四级权限分区存储
+
+        自研 .nano 容器文件格式, 比压缩包更安全的存储方式:
+        权限制度 + 校验 + 分区加密, 每个区域密码/权限都不一样
+
+        四个分区 (从低到高):
+            1. normal    — 普通区域, 无需任何权限
+            2. adminanorobit (Anon2) — 管理员级, 需 admin/sudo
+            3. asoav1    (Dona0 / 高泉区) — 内核级, 需 SYSTEM/root
+            4. nanou     — 最高权限区, 需 .nnu 脚本
+
+        用法:
+            # 创建容器
+            PM.nano.create("data.nano", anon2_pw="admin123",
+                           dona0_key="kernel_secret", nanou_key="top_secret")
+
+            # 添加文件
+            PM.nano.add("data.nano", "normal", "readme.txt")
+            PM.nano.add("data.nano", "adminanorobit", "secret.docx", anon2_pw="admin123")
+
+            # 列出 / 提取
+            PM.nano.list("data.nano", "normal")
+            PM.nano.extract("data.nano", "normal", output_dir="D:/out")
+
+            # Nanou 区: 执行 .nnu 脚本
+            PM.nano.run_nnu("extract.nnu")
+            PM.nano.nnu_help()  # 查看 .nnu 公开语法
+
+            # 别名: PM.container / PM.容器 / PM.纳米
+        """
+        return self._nano_module
+
+    # nano 别名
+    @property
+    def container(self):
+        """别名: PM.container = PM.nano"""
+        return self._nano_module
+
+    @property
+    def 容器(self):
+        """别名: PM.容器 = PM.nano"""
+        return self._nano_module
+
+    @property
+    def 纳米(self):
+        """别名: PM.纳米 = PM.nano"""
+        return self._nano_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -2015,7 +2086,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.5.5"
+PM.__version__ = "1.5.6"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name

@@ -368,6 +368,106 @@ PM.priv.levels()      # 可用提升级别
 
 **模块别名**: `PM.priv == PM.su == PM.runas == PM.elevate == PM.提权 == PM.权限`
 
+## .nano 容器模块 (v1.5.6) 📦
+
+自研 `.nano` 容器文件格式 — 四级权限分区存储。比普通压缩包更安全：权限制度 + 校验 + 分区加密，每个区域密码不一样，用户名不一样，权限更不一样。
+
+### 四个权限分区
+
+| 级别 | 分区名 | 密码 | 系统权限 | 用途 |
+|------|--------|------|----------|------|
+| 1 | `normal` (普通区) | 无 | 无 | 杂物、普通文件 |
+| 2 | `adminanorobit` (Anon2) | Anon2 密码 | Windows: Administrators<br>Linux: sudo | 进阶文件 |
+| 3 | `asoav1` (Dona0 / 高泉区) | Dona0 密钥 | Windows: SYSTEM<br>Linux: root | 重要文件、内核级 |
+| 4 | `nanou` (最高权限区) | Nanou 主密钥 + 挑战响应 | 系统最高权限 + .nnu 脚本 | 最高级别机密 |
+
+### 用法
+
+```python
+import PyMsi as PM
+
+# 创建 .nano 容器
+PM.nano.create("data.nano",
+    anon2_pw="admin123",          # Anon2 分区密码
+    dona0_key="kernel_secret_key", # Dona0 分区密钥
+    nanou_key="top_secret_master"  # Nanou 主密钥
+)
+
+# 添加文件到普通区
+PM.nano.add("data.nano", "normal", "readme.txt")
+PM.nano.add("data.nano", "normal", ["a.txt", "b.png"])
+
+# 添加文件到 Anon2 区 (需要密码 + 管理员权限)
+PM.nano.add("data.nano", "adminanorobit", "important.docx", anon2_pw="admin123")
+
+# 添加文件到 Asoav1 区 (需要 Dona0 密钥 + SYSTEM/root)
+PM.nano.add("data.nano", "asoav1", "kernel_config.bin", dona0_key="kernel_secret_key")
+
+# 添加文件到 Nanou 区 (需要 Nanou 主密钥)
+PM.nano.add("data.nano", "nanou", "top_secret.pdf", nanou_key="top_secret_master")
+
+# 列出 / 提取
+PM.nano.list("data.nano", "normal")
+PM.nano.extract("data.nano", "normal", output_dir="D:/NormalOut")
+PM.nano.extract("data.nano", "adminanorobit", anon2_pw="admin123", output_dir="D:/Anon2Out")
+
+# 查看容器信息
+PM.nano.info("data.nano")
+
+# Nanou 区: 执行 .nnu 脚本
+PM.nano.run_nnu("extract.nnu")
+PM.nano.nnu_help()  # 查看 .nnu 公开语法
+
+# 别名: PM.container / PM.容器 / PM.纳米
+```
+
+### .nnu 语法 (Nanou Narrative Unit — 完全公开)
+
+Nanou 最高权限区不能直接 `extract()`，必须写 `.nnu` 脚本经过多阶段流程才能打开：
+
+```nnu
+# 示例: list_nanou.nnu
+NANO_VERSION 1
+CONTAINER "data.nano"
+ZONE nanou
+
+PHASE auth
+    MASTER_KEY "dG9wX3NlY3JldF9tYXN0ZXI="
+END_PHASE
+
+PHASE action
+    LIST
+END_PHASE
+
+PHASE cleanup
+    WIPE_MEMORY true
+    CLOSE_CONTAINER true
+END_PHASE
+```
+
+**全部公开的 nnu 关键字：**
+
+| 阶段 | 关键字 | 说明 |
+|------|--------|------|
+| 顶层 | `NANO_VERSION` | 语法版本 |
+| 顶层 | `CONTAINER` | .nano 容器路径 |
+| 顶层 | `ZONE` | 目标分区名 |
+| `auth` | `MASTER_KEY` | Nanou 主密钥 (base64) |
+| `auth` | `CHALLENGE` | 挑战字符串 |
+| `auth` | `RESPONSE` | 响应 = SHA256(挑战+主密钥) |
+| `auth` | `USERNAME` | 用户名 (可选) |
+| `decrypt` | `ALGORITHM` | 加密算法 |
+| `decrypt` | `KEY_DERIVATION` | 密钥派生方式 |
+| `decrypt` | `SALT` | 盐值 (base64) |
+| `decrypt` | `ITERATIONS` | 迭代次数 |
+| `action` | `LIST` | 列出文件 |
+| `action` | `EXTRACT_ALL` | 提取全部到指定目录 |
+| `action` | `EXTRACT` | 提取单个文件 |
+| `action` | `VERIFY` | 验证 MD5 |
+| `cleanup` | `WIPE_MEMORY` | 清除内存密钥 |
+| `cleanup` | `CLOSE_CONTAINER` | 关闭容器 |
+| `cleanup` | `SECURE_WIPE` | 安全擦除 (预留) |
+
 ## 来聊天
 - 遇到 bug？[提 Issue](https://github.com/ZeroAnNull/PyMsi/issues)
 - 有想法或建议？[开 Discussion](https://github.com/ZeroAnNull/PyMsi/discussions)
