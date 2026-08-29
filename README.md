@@ -311,6 +311,63 @@ PM.meow.extract("D:/Meow/", "154.04.1.1:00000001")
 # 别名: PM.cat / PM.揉 / PM.猫
 ```
 
+## 权限提升模块 (v1.5.5) 🔐
+
+> ⚠️ **需要管理员 (Windows) / sudo (Linux) 权限，不能绕过认证！**
+>
+> 本模块在已有管理员/sudo 权限的基础上，进一步提升到 SYSTEM/root。它不能绕过 UAC 或 sudo 认证。
+
+### Windows: 管理员 → SYSTEM (NSudo 技术链)
+
+完整提升链：`AdjustTokenPrivileges` → `OpenProcess(winlogon.exe)` → `OpenProcessToken` → `DuplicateTokenEx` → `SetTokenInformation` → `CreateEnvironmentBlock` → `CreateProcessWithTokenW`
+
+```python
+import PyMsi as PM
+
+# 以 SYSTEM 权限运行
+PM.priv.system("notepad.exe")
+PM.priv.system("C:/Windows/System32/cmd.exe")
+
+# 以 TrustedInstaller 权限运行 (启动服务→抓令牌→停服务→创建进程)
+PM.priv.trusted("notepad.exe")
+
+# 以管理员运行 (UAC 提权弹窗)
+PM.priv.admin("notepad.exe")
+```
+
+### Linux: 用户 → root (sudo / pkexec)
+
+```python
+import PyMsi as PM
+
+# 以 root 运行
+PM.priv.system("ls /root")
+PM.priv.root("whoami")
+PM.priv.root("apt install nginx")
+
+# 以指定用户运行
+PM.priv.as_user("alice", "whoami")
+
+# 检查当前身份和权限
+PM.priv.whoami()      # 当前用户名
+PM.priv.is_admin()    # 是否管理员/root
+PM.priv.is_system()   # 是否 SYSTEM/root
+PM.priv.levels()      # 可用提升级别
+```
+
+### 提升级别
+
+| 平台 | 级别 | 说明 |
+|------|------|------|
+| Windows | `user` | 当前用户 (普通权限) |
+| Windows | `admin` | 管理员 (UAC 提权) |
+| Windows | `system` | SYSTEM (最高系统权限) |
+| Windows | `trusted` | TrustedInstaller (文件所有者) |
+| Linux | `user` | 当前用户 (普通权限) |
+| Linux | `admin`/`system`/`root` | root (通过 sudo/pkexec) |
+
+**模块别名**: `PM.priv == PM.su == PM.runas == PM.elevate == PM.提权 == PM.权限`
+
 ## 来聊天
 - 遇到 bug？[提 Issue](https://github.com/ZeroAnNull/PyMsi/issues)
 - 有想法或建议？[开 Discussion](https://github.com/ZeroAnNull/PyMsi/discussions)

@@ -23,12 +23,23 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.5.4                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow ║
+║                    PyMsi  v1.5.5                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.5.4-py3-none-any.whl
+    pip install pymsi-1.5.5-py3-none-any.whl
+【1.5.5 新增】
+    🔐 进程权限提升 (以特定权限打开进程)
+        ⚠️ 需要管理员(Win)/sudo(Linux), 不能绕过认证!
+        Windows: 管理员→SYSTEM / TrustedInstaller (NSudo技术链)
+        Linux:   用户→root (sudo / pkexec)
+        PM.priv.system("notepad.exe")               # Win: SYSTEM | Linux: root
+        PM.priv.trusted("notepad.exe")               # Win: TrustedInstaller
+        PM.priv.admin("notepad.exe")                 # Win: UAC | Linux: sudo
+        PM.priv.whoami()                             # 查看当前身份
+        PM.priv.levels()                              # 可用提升级别
+        别名: PM.su / PM.runas / PM.elevate / PM.提权
 【1.5.4 新增】
     🐱 .meow 文件打包/解包 (多文件揉成 .meow + address.json)
         PM.meow.disteow(["a.txt", "b.png", "c.pdf"])  # 揉成 .meow
@@ -1036,6 +1047,11 @@ from .recorder import _ScreenRecordModule
 # ═══════════════════════════════════════════════════════════════
 from .meow import _MeowModule
 
+# ═══════════════════════════════════════════════════════════════
+# 进程权限提升模块 (1.5.5 新增) — SYSTEM/TrustedInstaller (Win) / root (Linux)
+# ═══════════════════════════════════════════════════════════════
+from .priv import _PrivModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1078,6 +1094,7 @@ class _PyMsi:
         self._shrink_module = _ShrinkZetaModule()
         self._record_module = _ScreenRecordModule()
         self._meow_module = _MeowModule()
+        self._priv_module = _PrivModule()
 
     def __call__(self, path):
         """
@@ -1921,6 +1938,65 @@ class _PyMsi:
         """别名: PM.猫 = PM.meow"""
         return self._meow_module
 
+    @property
+    def priv(self):
+        """
+        🔐 进程权限提升模块 (1.5.5 新增)
+
+        以特定权限打开进程:
+            Windows: 管理员 → SYSTEM / TrustedInstaller (NSudo 技术链)
+            Linux:   普通用户 → root (通过 sudo / pkexec)
+
+        ⚠️ 需要管理员 (Windows) / sudo (Linux) 权限, 不能绕过认证!
+
+        用法:
+            # Windows: 以 SYSTEM 权限运行
+            PM.priv.system("notepad.exe")
+            PM.priv.system("C:/Windows/System32/cmd.exe")
+
+            # Windows: 以 TrustedInstaller 运行
+            PM.priv.trusted("notepad.exe")
+
+            # Windows: 以管理员运行 (UAC)
+            PM.priv.admin("notepad.exe")
+
+            # Linux: 以 root 运行
+            PM.priv.system("ls /root")
+            PM.priv.root("whoami")
+
+            # 查看当前身份
+            PM.priv.whoami()
+
+            # 别名: PM.su / PM.runas / PM.elevate / PM.提权
+        """
+        return self._priv_module
+
+    # priv 别名
+    @property
+    def su(self):
+        """别名: PM.su = PM.priv"""
+        return self._priv_module
+
+    @property
+    def runas(self):
+        """别名: PM.runas = PM.priv"""
+        return self._priv_module
+
+    @property
+    def elevate(self):
+        """别名: PM.elevate = PM.priv"""
+        return self._priv_module
+
+    @property
+    def 提权(self):
+        """别名: PM.提权 = PM.priv"""
+        return self._priv_module
+
+    @property
+    def 权限(self):
+        """别名: PM.权限 = PM.priv"""
+        return self._priv_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -1939,7 +2015,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.5.4"
+PM.__version__ = "1.5.5"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
