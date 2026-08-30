@@ -468,6 +468,46 @@ END_PHASE
 | `cleanup` | `CLOSE_CONTAINER` | 关闭容器 |
 | `cleanup` | `SECURE_WIPE` | 安全擦除 (预留) |
 
+## 摩斯密码视频模块 (v1.5.7) 📡
+
+把明文文本转换成摩斯密码视频——用颜色和帧时长来编码。纯 Python AVI 编码器，无压缩，颜色 100% 准确，零第三方依赖。
+
+**为什么用 AVI 不用 MP4？** MP4 用有损压缩，纯色帧会被压缩出杂色，摩斯密码解码会出错。AVI 无压缩保证颜色绝对准确。
+
+### 编码规则
+
+| 颜色 | 时长 | 含义 |
+|------|------|------|
+| ⚪ 白色 | 25 帧 (1 秒) | 点 `.` |
+| ⚫ 黑色 | 38 帧 (1.5 秒) | 划 `-` |
+| 🔴 红色 | 20 帧 (0.8 秒) | 空格（字母间隔）|
+| 🟢 绿色 | 20 帧 (0.8 秒) | `/`（单词分隔）|
+
+### 用法
+
+```python
+import PyMsi as PM
+
+# 一键生成摩斯密码视频
+PM.morse("Hello World", output="morse.avi")
+
+# 自定义分辨率和帧率
+PM.morse("SOS", output="sos.avi", size=(640, 480), fps=25)
+
+# 只转摩斯密码 (不生成视频)
+code = PM.morse.text_to_morse("Hello World")
+print(code)  # .... . .-.. .-.. --- / .-- --- .-. .-.. -..
+
+# 单独生成说明文档 txt
+PM.morse.readme("morse_readme.txt")
+```
+
+**输出：**
+- `.avi` 视频文件（无压缩 24-bit BGR）
+- `xxx_说明.txt` 说明文档（编码规则、视频信息、解码方法）
+
+**别名：** `PM.morse_video` / `PM.摩斯密码` / `PM.摩斯` / `PM.mv`
+
 ## 来聊天
 - 遇到 bug？[提 Issue](https://github.com/ZeroAnNull/PyMsi/issues)
 - 有想法或建议？[开 Discussion](https://github.com/ZeroAnNull/PyMsi/discussions)

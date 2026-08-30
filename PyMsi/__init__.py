@@ -23,12 +23,27 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.5.6                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano ║
+║                    PyMsi  v1.5.7                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.5.6-py3-none-any.whl
+    pip install pymsi-1.5.7-py3-none-any.whl
+【1.5.7 新增】
+    📡 摩斯密码视频 (明文→摩斯密码→AVI视频, 纯自研)
+        用颜色和时长编码摩斯密码:
+          白色 25帧 = 点 (.)
+          黑色 1.5秒 = 划 (-)
+          红色 20帧 = 空格 (字母间隔)
+          绿色 20帧 = / (单词分隔)
+        纯 Python AVI 编码器 (无压缩, 颜色100%准确)
+        自动生成说明文档 txt
+        零第三方依赖
+        PM.morse("Hello World", output="morse.avi")
+        PM.morse("SOS", size=(640, 480), fps=25)
+        PM.morse.text_to_morse("Hello")           # 只转摩斯密码
+        PM.morse.readme("readme.txt")             # 生成说明文档
+        别名: PM.morse_video / PM.摩斯密码 / PM.摩斯 / PM.mv
 【1.5.6 新增】
     📦 .nano 容器 (四级权限分区存储, 纯自研)
         比压缩包更安全: 权限制度 + 校验 + 分区加密
@@ -1071,6 +1086,13 @@ from .priv import _PrivModule
 # ═══════════════════════════════════════════════════════════════
 from .nano import _NanoModule
 
+# ═══════════════════════════════════════════════════════════════
+# 摩斯密码视频模块 (1.5.7 新增) — 明文→摩斯密码→AVI视频
+# 白色=点(25帧) 黑色=划(1.5秒) 红色=空格(20帧) 绿色=/(20帧)
+# 纯 Python AVI 编码器, 零依赖, 颜色100%准确
+# ═══════════════════════════════════════════════════════════════
+from .morse import _MorseVideoModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1115,6 +1137,7 @@ class _PyMsi:
         self._meow_module = _MeowModule()
         self._priv_module = _PrivModule()
         self._nano_module = _NanoModule()
+        self._morse_module = _MorseVideoModule()
 
     def __call__(self, path):
         """
@@ -2067,6 +2090,58 @@ class _PyMsi:
     def 纳米(self):
         """别名: PM.纳米 = PM.nano"""
         return self._nano_module
+
+    @property
+    def morse(self):
+        """
+        📡 摩斯密码视频模块 (1.5.7 新增) — 明文→摩斯密码→AVI视频
+
+        把文本转换成摩斯密码视频, 用颜色和时长编码:
+            白色 25帧 = 点 (.)
+            黑色 1.5秒 = 划 (-)
+            红色 20帧 = 空格 (字母间隔)
+            绿色 20帧 = / (单词分隔)
+
+        纯 Python AVI 编码器 (无压缩), 颜色100%准确, 零第三方依赖
+        自动生成说明文档 txt
+
+        用法:
+            # 一键生成
+            PM.morse("Hello World", output="morse.avi")
+
+            # 自定义分辨率和帧率
+            PM.morse("SOS", output="sos.avi", size=(640, 480), fps=25)
+
+            # 只转摩斯密码 (不生成视频)
+            code = PM.morse.text_to_morse("Hello World")
+
+            # 单独生成说明文档
+            PM.morse.readme("readme.txt")
+
+            # 别名: PM.morse_video / PM.摩斯密码 / PM.摩斯 / PM.mv
+        """
+        return self._morse_module
+
+    # morse 别名
+    @property
+    def morse_video(self):
+        """别名: PM.morse_video = PM.morse"""
+        return self._morse_module
+
+    @property
+    def mv(self):
+        """别名: PM.mv = PM.morse"""
+        return self._morse_module
+
+    @property
+    def 摩斯密码(self):
+        """别名: PM.摩斯密码 = PM.morse"""
+        return self._morse_module
+
+    @property
+    def 摩斯(self):
+        """别名: PM.摩斯 = PM.morse"""
+        return self._morse_module
 
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
