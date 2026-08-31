@@ -113,7 +113,8 @@ _MORSE_CODE = {
 class _AVIWriter:
     """AVI 文件写入器 — 纯手写 RIFF/AVI 容器
 
-    无压缩 24-bit BGR 视频, 底部优先 (bottom-up)
+    无压缩 24-bit BGR 视频, 顶部优先 (top-down, 负高度)
+    每行 4 字节对齐 (标准 BMP 要求)
     流式写入: 逐帧追加, 关闭时回写索引和大小
     """
 
@@ -126,6 +127,9 @@ class _AVIWriter:
         self._frame_offsets = []
         self._movi_data_start = 0
         self._max_frame_size = 0
+        # 每行实际字节数 (4 字节对齐)
+        self._stride = (width * 3 + 3) & ~3
+        self._frame_size = self._stride * height
 
         self._fp = open(path, "wb")
         self._write_header_placeholder()
@@ -135,30 +139,33 @@ class _AVIWriter:
         fp = self._fp
         w, h, fps = self._width, self._height, self._fps
         us_per_frame = 1000000 // fps
+        bytes_per_sec = self._frame_size * fps
+        image_size = self._frame_size
 
         # ─── RIFF 头 (占位) ───
         fp.write(b"RIFF")
-        fp.write(struct.pack("<I", 0))
+        fp.write(struct.pack("<I", 0))  # 占位, close 时回写
         fp.write(b"AVI ")
 
         # ─── LIST hdrl ───
         fp.write(b"LIST")
-        fp.write(struct.pack("<I", 0))
+        fp.write(struct.pack("<I", 0))  # 占位
         fp.write(b"hdrl")
-        hdrl_start = fp.tell() - 4
+        hdrl_start = fp.tell() - 4  # "hdrl" 开始位置
 
         # ─── avih (主头, 56 字节) ───
+        # dwFlags: AVIF_HASINDEX(0x10) | AVIF_ISINTERLEAVED(0x100) | AVIF_TRUSTCKTYPE(0x800)
         avih_data = struct.pack("<IIIIIIIIIIIIII",
-            us_per_frame,  # dwMicroSecPerFrame
-            0,             # dwMaxBytesPerSec
-            0,             # dwPaddingGranularity
-            0x10,          # dwFlags = AVIF_HASINDEX
-            0,             # dwTotalFrames
-            0,             # dwInitialFrames
-            1,             # dwStreams
-            0,             # dwSuggestedBufferSize
-            w, h,          # dwWidth, dwHeight
-            0, 0, 0, 0     # dwReserved[4]
+            us_per_frame,    # dwMicroSecPerFrame
+            bytes_per_sec,   # dwMaxBytesPerSec
+            0,               # dwPaddingGranularity
+            0x910,           # dwFlags = HASINDEX | ISINTERLEAVED | TRUSTCKTYPE
+            0,               # dwTotalFrames (占位, close 回写)
+            0,               # dwInitialFrames
+            1,               # dwStreams
+            0,               # dwSuggestedBufferSize (占位)
+            w, h,            # dwWidth, dwHeight
+            0, 0, 0, 0       # dwReserved[4]
         )
         fp.write(b"avih")
         fp.write(struct.pack("<I", len(avih_data)))
@@ -167,43 +174,46 @@ class _AVIWriter:
         # ─── LIST strl ───
         strl_start = fp.tell()
         fp.write(b"LIST")
-        fp.write(struct.pack("<I", 0))
+        fp.write(struct.pack("<I", 0))  # 占位
         fp.write(b"strl")
 
         # strh (流头, 56 字节)
+        # fccHandler 用 0 表示无压缩 (和 ffmpeg 一致, 兼容性更好)
         strh_data = struct.pack("<4s4sIHHIIIIIIIIHHHH",
-            b"vids",    # fccType
-            b"DIB ",    # fccHandler
-            0,          # dwFlags
-            0,          # wPriority
-            0,          # wLanguage
-            0,          # dwInitialFrames
-            1,          # dwScale
-            fps,        # dwRate
-            0,          # dwStart
-            0,          # dwLength
-            0,          # dwSuggestedBufferSize
-            0xFFFFFFFF, # dwQuality
-            0,          # dwSampleSize
-            0, 0,       # rcFrame
-            w, h        # rcFrame
+            b"vids",        # fccType
+            b"\x00\x00\x00\x00",  # fccHandler = 0 (无压缩)
+            0,              # dwFlags
+            0,              # wPriority
+            0,              # wLanguage
+            0,              # dwInitialFrames
+            1,              # dwScale
+            fps,            # dwRate
+            0,              # dwStart
+            0,              # dwLength (占位, close 回写)
+            0,              # dwSuggestedBufferSize (占位)
+            0xFFFFFFFF,     # dwQuality (-1)
+            0,              # dwSampleSize
+            0, 0,           # rcFrame left, top
+            w, h            # rcFrame right, bottom
         )
         fp.write(b"strh")
         fp.write(struct.pack("<I", len(strh_data)))
         fp.write(strh_data)
 
         # strf (BITMAPINFOHEADER, 40 字节)
-        image_size = w * h * 3
+        # biHeight 用负数表示 top-down (视频标准, 和 ffmpeg 一致)
         strf_data = struct.pack("<IiiHHIIiiII",
-            40,         # biSize
-            w,          # biWidth
-            h,          # biHeight
-            1,          # biPlanes
-            24,         # biBitCount
-            0,          # biCompression = BI_RGB
-            image_size, # biSizeImage
-            0, 0,       # biXPelsPerMeter, biYPelsPerMeter
-            0, 0        # biClrUsed, biClrImportant
+            40,             # biSize
+            w,              # biWidth
+            -h,             # biHeight (负 = top-down, 视频从上到下)
+            1,              # biPlanes
+            24,             # biBitCount
+            0,              # biCompression = BI_RGB (无压缩)
+            image_size,     # biSizeImage
+            0,              # biXPelsPerMeter
+            0,              # biYPelsPerMeter
+            0,              # biClrUsed
+            0               # biClrImportant
         )
         fp.write(b"strf")
         fp.write(struct.pack("<I", len(strf_data)))
@@ -219,33 +229,55 @@ class _AVIWriter:
         # 回写 hdrl LIST 大小
         hdrl_end = fp.tell()
         hdrl_size = hdrl_end - hdrl_start
-        fp.seek(hdrl_start - 4)
+        fp.seek(hdrl_start - 4)  # 回到 hdrl LIST size 位置
         fp.write(struct.pack("<I", hdrl_size))
         fp.seek(hdrl_end)
 
         # ─── LIST movi ───
         self._movi_list_pos = fp.tell()
         fp.write(b"LIST")
-        fp.write(struct.pack("<I", 0))
+        fp.write(struct.pack("<I", 0))  # 占位
         fp.write(b"movi")
-        self._movi_data_start = fp.tell()
+        self._movi_data_start = fp.tell()  # movi 数据起始 (用于 idx1 偏移)
 
     def add_frame(self, bgr_data):
-        """添加一帧 (24-bit BGR, 底部优先, 无行填充)"""
+        """添加一帧 (24-bit BGR, 顶部优先, 4 字节行对齐)
+
+        Args:
+            bgr_data: bytes  紧凑 BGR 像素数据 (宽*高*3 字节, 从上到下)
+        """
         fp = self._fp
-        pad = b"\x00" if len(bgr_data) % 2 else b""
+        w = self._width
+        h = self._height
+        stride = self._stride
+
+        # 如果 stride != width*3, 需要做行对齐填充
+        if stride == w * 3:
+            frame_bytes = bgr_data
+        else:
+            # 逐行添加填充
+            row_size = w * 3
+            pad_size = stride - row_size
+            pad = b"\x00" * pad_size
+            parts = []
+            for y in range(h):
+                parts.append(bgr_data[y * row_size:(y + 1) * row_size])
+                parts.append(pad)
+            frame_bytes = b"".join(parts)
+
+        # 帧数据需要 2 字节对齐 (AVI chunk 对齐)
+        chunk_pad = b"\x00" if len(frame_bytes) % 2 else b""
 
         offset = fp.tell() - self._movi_data_start
         fp.write(b"00dc")
-        fp.write(struct.pack("<I", len(bgr_data)))
-        fp.write(bgr_data)
-        if pad:
-            fp.write(pad)
+        fp.write(struct.pack("<I", len(frame_bytes)))
+        fp.write(frame_bytes)
+        if chunk_pad:
+            fp.write(chunk_pad)
 
-        frame_size = len(bgr_data)
-        self._frame_offsets.append((offset, frame_size))
-        if frame_size > self._max_frame_size:
-            self._max_frame_size = frame_size
+        self._frame_offsets.append((offset, len(frame_bytes)))
+        if len(frame_bytes) > self._max_frame_size:
+            self._max_frame_size = len(frame_bytes)
         self._frame_count += 1
 
     def close(self):
@@ -258,31 +290,35 @@ class _AVIWriter:
         fp.write(struct.pack("<I", self._frame_count * 16))
         for offset, size in self._frame_offsets:
             fp.write(struct.pack("<4sIII",
-                b"00dc",   # ckid
-                0x10,      # dwFlags = AVIIF_KEYFRAME
-                offset,    # dwOffset
-                size       # dwSize
+                b"00dc",        # ckid
+                0x10,           # dwFlags = AVIIF_KEYFRAME
+                offset,         # dwOffset (相对 movi 数据起始)
+                size            # dwSize
             ))
 
         file_end = fp.tell()
 
-        # 回写 movi LIST 大小
+        # ─── 回写 movi LIST 大小 ───
         movi_size = movi_end - self._movi_data_start
         fp.seek(self._movi_list_pos + 4)
         fp.write(struct.pack("<I", movi_size))
 
-        # 回写 RIFF 总大小
+        # ─── 回写 RIFF 总大小 ───
         riff_size = file_end - 8
         fp.seek(4)
         fp.write(struct.pack("<I", riff_size))
 
-        # 回写 avih 中的 dwTotalFrames 和 dwSuggestedBufferSize
+        # ─── 回写 avih 中的 dwTotalFrames 和 dwSuggestedBufferSize ───
+        # avih 数据起始 = 12(RIFF) + 12(LIST hdrl) + 8(avih chunk header) = 32
+        # dwTotalFrames 偏移 16, dwSuggestedBufferSize 偏移 28
         fp.seek(32 + 16)
         fp.write(struct.pack("<I", self._frame_count))
         fp.seek(32 + 28)
         fp.write(struct.pack("<I", self._max_frame_size))
 
-        # 回写 strh 中的 dwLength 和 dwSuggestedBufferSize
+        # ─── 回写 strh 中的 dwLength 和 dwSuggestedBufferSize ───
+        # strh 数据起始 = 108
+        # dwLength 偏移 32, dwSuggestedBufferSize 偏移 36
         fp.seek(108 + 32)
         fp.write(struct.pack("<I", self._frame_count))
         fp.seek(108 + 36)
