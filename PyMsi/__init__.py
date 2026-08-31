@@ -1093,6 +1093,13 @@ from .nano import _NanoModule
 # ═══════════════════════════════════════════════════════════════
 from .morse import _MorseVideoModule
 
+# ═══════════════════════════════════════════════════════════════
+# 十六进制 RGB 视频模块 (1.5.8 新增) — 文本→Hex→RGB纯色AVI视频
+# 16个hex数字(0-9,a-f)各映射到一种RGB纯色, 每色25帧
+# 白色=开头标记/空格, 纯 Python AVI, 零依赖
+# ═══════════════════════════════════════════════════════════════
+from .hexvid import _HexVideoModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1138,6 +1145,7 @@ class _PyMsi:
         self._priv_module = _PrivModule()
         self._nano_module = _NanoModule()
         self._morse_module = _MorseVideoModule()
+        self._hexvid_module = _HexVideoModule()
 
     def __call__(self, path):
         """
@@ -2142,6 +2150,49 @@ class _PyMsi:
     def 摩斯(self):
         """别名: PM.摩斯 = PM.morse"""
         return self._morse_module
+
+    @property
+    def hexvid(self):
+        """
+        🎨 十六进制 RGB 视频模块 (1.5.8 新增) — 文本→Hex→RGB纯色AVI视频
+
+        把文本编码为十六进制, 每个 hex 数字映射到一种 RGB 纯色:
+            白色 25帧 = 开头标记 / 空格
+            0=黑 1=红 2=绿 3=蓝 4=黄 5=品红 6=青 7=橙
+            8=紫 9=青柠 a=蓝绿 b=粉 c=深蓝 d=深红 e=橄榄 f=灰
+
+        纯 Python AVI (无压缩), 颜色100%准确, 零依赖
+        自动生成说明文档 txt
+
+        用法:
+            # 一键生成
+            PM.hexvid("Hello", output="hello.avi")
+
+            # 自定义分辨率
+            PM.hexvid("Hi", output="hi.avi", size=(640, 480))
+
+            # 只转 hex (不生成视频)
+            code = PM.hexvid.text_to_hex("Hello")
+
+            # 别名: PM.hex_video / PM.hv / PM.十六进制视频
+        """
+        return self._hexvid_module
+
+    # hexvid 别名
+    @property
+    def hex_video(self):
+        """别名: PM.hex_video = PM.hexvid"""
+        return self._hexvid_module
+
+    @property
+    def hv(self):
+        """别名: PM.hv = PM.hexvid"""
+        return self._hexvid_module
+
+    @property
+    def 十六进制视频(self):
+        """别名: PM.十六进制视频 = PM.hexvid"""
+        return self._hexvid_module
 
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────

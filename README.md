@@ -508,6 +508,54 @@ PM.morse.readme("morse_readme.txt")
 
 **别名：** `PM.morse_video` / `PM.摩斯密码` / `PM.摩斯` / `PM.mv`
 
+## 十六进制 RGB 视频模块 (v1.5.8) 🎨
+
+把文本编码为十六进制，每个 hex 数字（0-9, a-f）映射到一种 RGB 纯色，每色 25 帧。比摩斯密码更直观——直接看颜色就能读出 hex 值。
+
+**编码规则：**
+- 纯白色 25 帧 = 开头标记 / 空格
+- 每个 hex 数字 = 25 帧对应 RGB 颜色
+
+**颜色映射表：**
+
+| Hex | RGB | 颜色 |
+|-----|-----|------|
+| 0 | (0,0,0) | 黑 |
+| 1 | (255,0,0) | 红 |
+| 2 | (0,255,0) | 绿 |
+| 3 | (0,0,255) | 蓝 |
+| 4 | (255,255,0) | 黄 |
+| 5 | (255,0,255) | 品红 |
+| 6 | (0,255,255) | 青 |
+| 7 | (255,128,0) | 橙 |
+| 8 | (128,0,255) | 紫 |
+| 9 | (128,255,0) | 青柠 |
+| a | (0,128,128) | 蓝绿 |
+| b | (255,128,192) | 粉 |
+| c | (0,0,128) | 深蓝 |
+| d | (128,0,0) | 深红 |
+| e | (128,128,0) | 橄榄 |
+| f | (128,128,128) | 灰 |
+
+```python
+import PyMsi as PM
+
+# 一键生成
+PM.hexvid("Hello", output="hello.avi")
+
+# 自定义分辨率
+PM.hexvid("Hi", output="hi.avi", size=(640, 480))
+
+# 只转 hex (不生成视频)
+code = PM.hexvid.text_to_hex("Hello")
+```
+
+**输出：**
+- `.avi` 视频文件（无压缩 24-bit BGR）
+- `xxx_说明.txt` 说明文档（颜色映射表、颜色序列、解码方法）
+
+**别名：** `PM.hex_video` / `PM.hv` / `PM.十六进制视频`
+
 ## 来聊天
 - 遇到 bug？[提 Issue](https://github.com/ZeroAnNull/PyMsi/issues)
 - 有想法或建议？[开 Discussion](https://github.com/ZeroAnNull/PyMsi/discussions)
