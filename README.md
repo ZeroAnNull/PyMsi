@@ -556,6 +556,77 @@ code = PM.hexvid.text_to_hex("Hello")
 
 **别名：** `PM.hex_video` / `PM.hv` / `PM.十六进制视频`
 
+## 生物教育模块 (v1.5.9 Education Edition) 🧬
+
+专为程序员设计的生物学教学工具。用编程类比讲解细胞结构、蛋白质和酶。
+
+### 三大功能
+
+**1. 细胞结构教程** — 生成互动式 Python 文件，运行后在终端逐步输出教程
+
+```python
+PM.bio.cell()                        # 生成 cell_tutorial.py
+PM.bio.cell(output="my_tutorial.py") # 自定义文件名
+```
+
+教程覆盖 11 个细胞结构：细胞膜、细胞质、细胞核、线粒体、核糖体、内质网、高尔基体、溶酶体、叶绿体、液泡、细胞壁。每个都有程序员能听懂的类比（如：核糖体=编译器、溶酶体=垃圾回收器、细胞膜=防火墙）。
+
+**2. 蛋白质系统** — 10 种蛋白质文件，可加热变性
+
+```python
+PM.bio.protein("hemoglobin")   # 血红蛋白
+PM.bio.protein("keratin")      # 角蛋白
+PM.bio.protein("casein")       # 酪蛋白
+PM.bio.protein("血红蛋白")      # 支持中文
+```
+
+可用蛋白质：胰蛋白、角蛋白、酪蛋白、血红蛋白、血清蛋白、储存蛋白、胶原蛋白、肌球蛋白、膜蛋白、组蛋白
+
+每种蛋白质都有正确的变性温度，加热超过变性温度就会变性（不可逆）：
+
+```python
+PM.bio.denature("hemoglobin.protein", temp=70)   # 65°C变性 → 70°C会变性!
+PM.bio.denature("keratin.protein", temp=100)       # 140°C变性 → 100°C没事
+```
+
+**3. 酶系统** — 7 种酶，可催化对应蛋白质
+
+```python
+PM.bio.enzyme("pepsin")     # 胃蛋白酶
+PM.bio.enzyme("amylase")    # 淀粉酶
+PM.bio.enzyme("胃蛋白酶")    # 支持中文
+
+# 酶催化反应
+PM.bio.catalyze("pepsin.enzyme", "casein.protein")  # 胃蛋白酶催化酪蛋白
+```
+
+可用酶：胰蛋白酶、胃蛋白酶、淀粉酶、蛋白酶K、凝血酶、解旋酶、ATP酶
+
+酶催化会检查：底物匹配、酶是否失活、温度/pH 效率
+
+### 蛋白质-酶对应关系
+
+| 酶 | 目标蛋白 | 机制 |
+|----|---------|------|
+| 胃蛋白酶 | 酪蛋白 | 酸性条件水解 |
+| 胰蛋白酶 | 酪蛋白 | 精确切割碱性氨基酸 |
+| 蛋白酶K | 角蛋白 | 广谱切割，耐高温 |
+| 凝血酶 | 纤维蛋白原 | 精确激活凝血 |
+| 解旋酶 | 组蛋白 | 消耗ATP解开DNA-组蛋白 |
+| ATP酶 | 肌球蛋白 | 水解ATP产生运动力 |
+
+```python
+# 完整流程示例
+PM.bio.protein("casein")                           # 生成酪蛋白
+PM.bio.enzyme("pepsin")                            # 生成胃蛋白酶
+PM.bio.catalyze("pepsin.enzyme", "casein.protein") # 酶催化
+PM.bio.denature("hemoglobin.protein", temp=70)     # 加热变性
+
+PM.bio.list_all()  # 列出所有蛋白质和酶
+```
+
+**别名：** `PM.biology` / `PM.生物`
+
 ## 来聊天
 - 遇到 bug？[提 Issue](https://github.com/ZeroAnNull/PyMsi/issues)
 - 有想法或建议？[开 Discussion](https://github.com/ZeroAnNull/PyMsi/discussions)

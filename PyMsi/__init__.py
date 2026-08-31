@@ -1100,6 +1100,12 @@ from .morse import _MorseVideoModule
 # ═══════════════════════════════════════════════════════════════
 from .hexvid import _HexVideoModule
 
+# ═══════════════════════════════════════════════════════════════
+# 生物教育模块 (1.5.9 Education Edition) — 细胞结构+蛋白质+酶
+# 生成互动教程/蛋白质文件/酶文件, 可加热变性和酶催化
+# ═══════════════════════════════════════════════════════════════
+from .bio import _BioModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1146,6 +1152,7 @@ class _PyMsi:
         self._nano_module = _NanoModule()
         self._morse_module = _MorseVideoModule()
         self._hexvid_module = _HexVideoModule()
+        self._bio_module = _BioModule()
 
     def __call__(self, path):
         """
@@ -2193,6 +2200,56 @@ class _PyMsi:
     def 十六进制视频(self):
         """别名: PM.十六进制视频 = PM.hexvid"""
         return self._hexvid_module
+
+    @property
+    def bio(self):
+        """
+        🧬 生物教育模块 (1.5.9 Education Edition) — 细胞结构+蛋白质+酶
+
+        专为程序员设计的生物学教学工具:
+        1. 细胞结构 — 生成互动式教程 Python 文件 (运行后终端输出)
+        2. 蛋白质系统 — 10种蛋白质, 可加热变性
+        3. 酶系统 — 7种酶, 可催化对应蛋白质
+
+        用法:
+            # 生成细胞结构教程
+            PM.bio.cell()
+            PM.bio.cell(output="my_tutorial.py")
+
+            # 生成蛋白质文件
+            PM.bio.protein("hemoglobin")
+            PM.bio.protein("血红蛋白")  # 支持中文
+
+            # 生成酶文件
+            PM.bio.enzyme("pepsin")
+            PM.bio.enzyme("胃蛋白酶")
+
+            # 加热变性
+            PM.bio.denature("hemoglobin.protein", temp=70)
+            PM.bio.heat("casein.protein", temp=100)  # 别名
+
+            # 酶催化反应
+            PM.bio.catalyze("pepsin.enzyme", "casein.protein")
+            PM.bio.react("pepsin.enzyme", "casein.protein")  # 别名
+
+            # 列出所有可用蛋白质和酶
+            PM.bio.list_proteins()
+            PM.bio.list_enzymes()
+            PM.bio.list_all()
+
+            # 别名: PM.biology / PM.生物
+        """
+        return self._bio_module
+
+    @property
+    def biology(self):
+        """别名: PM.biology = PM.bio"""
+        return self._bio_module
+
+    @property
+    def 生物(self):
+        """别名: PM.生物 = PM.bio"""
+        return self._bio_module
 
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
