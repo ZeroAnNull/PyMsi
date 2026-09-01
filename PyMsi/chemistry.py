@@ -566,7 +566,7 @@ def generate_reaction_simulator(output_path="chem_reaction_sim.py"):
 import time
 import sys
 
-REACTIONS = ''' + json.dumps(REACTIONS, ensure_ascii=False, indent=2) + '''
+REACTIONS = ''' + json.dumps(REACTIONS, ensure_ascii=False, indent=2).replace('true', 'True').replace('false', 'False') + '''
 
 def typewriter(text, delay=0.02):
     for ch in text:

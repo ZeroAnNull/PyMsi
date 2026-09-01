@@ -23,27 +23,40 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.5.7                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 ║
+║                    PyMsi  v1.6.0  Education Plus            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 | 🎨HexRGB视频 | 🧬生物 | ⚗️化学 | 🔢数学 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.5.7-py3-none-any.whl
-【1.5.7 新增】
-    📡 摩斯密码视频 (明文→摩斯密码→AVI视频, 纯自研)
-        用颜色和时长编码摩斯密码:
-          白色 25帧 = 点 (.)
-          黑色 1.5秒 = 划 (-)
-          红色 20帧 = 空格 (字母间隔)
-          绿色 20帧 = / (单词分隔)
-        纯 Python AVI 编码器 (无压缩, 颜色100%准确)
-        自动生成说明文档 txt
-        零第三方依赖
-        PM.morse("Hello World", output="morse.avi")
-        PM.morse("SOS", size=(640, 480), fps=25)
-        PM.morse.text_to_morse("Hello")           # 只转摩斯密码
-        PM.morse.readme("readme.txt")             # 生成说明文档
-        别名: PM.morse_video / PM.摩斯密码 / PM.摩斯 / PM.mv
+    pip install pymsi-1.6.0-py3-none-any.whl
+【1.6.0 Education Plus 新增】
+    ⚗️ 化学教育模块 (元素周期表+分子结构+化学反应模拟+溶液计算+方程配平)
+        PM.chem.element()          # 元素周期表教程
+        PM.chem.reaction()          # 化学反应模拟器
+        PM.chem.molecule()         # 分子结构教程
+        PM.chem.molarity(10, 40, 0.5)  # 摩尔浓度
+        PM.chem.ph(0.001)          # pH值计算
+        PM.chem.balance("H2+O2=H2O")  # 方程配平
+    🔢 数学教育模块 (代数+几何+微积分+线性代数+概率+数论)
+        PM.math.quadratic(1, -5, 6)  # 解二次方程
+        PM.math.gcd(48, 36)          # 最大公约数
+        PM.math.matrix_mult(A, B)   # 矩阵乘法
+        PM.math.is_prime(17)         # 质数判断
+        PM.math.fast_pow(3, 13, 100) # 快速幂
+        PM.math.algebra()            # 代数教程
+        PM.math.calculus()           # 微积分教程
+        PM.math.number_theory()      # 数论教程
+【1.5.9 Education Edition 新增】
+    🧬 生物教育模块 (细胞结构+蛋白质系统+酶系统)
+        PM.bio.cell()                    # 细胞结构教程
+        PM.bio.protein("hemoglobin")     # 生成蛋白质文件
+        PM.bio.enzyme("pepsin")          # 生成酶文件
+        PM.bio.denature("hemoglobin.protein", temp=70)  # 加热变性
+        PM.bio.catalyze("pepsin.enzyme", "casein.protein")  # 酶催化
+【1.5.8 新增】
+    🎨 十六进制 RGB 视频 (文本→Hex→RGB纯色AVI视频)
+        16个hex数字各对应一种纯色, 25帧/色
+        PM.hexvid("Hello World", output="hello.avi")
 【1.5.6 新增】
     📦 .nano 容器 (四级权限分区存储, 纯自研)
         比压缩包更安全: 权限制度 + 校验 + 分区加密
@@ -2364,7 +2377,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.5.6"
+PM.__version__ = "1.6.0"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
