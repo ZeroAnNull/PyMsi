@@ -627,6 +627,100 @@ PM.bio.list_all()  # 列出所有蛋白质和酶
 
 **别名：** `PM.biology` / `PM.生物`
 
+## 化学教育模块 (v1.6.0 Education Plus) ⚗️
+
+专为程序员设计的化学教学工具。用编程类比讲解元素、分子、反应。
+
+### 五大功能
+
+**1. 元素周期表** — 20个常见元素，每个都有程序员能听懂的类比
+
+```python
+PM.chem.element()   # 生成元素周期表互动教程
+```
+
+**2. 分子结构** — 10种常见分子，用数据结构类比
+
+```python
+PM.chem.molecule()  # 生成分子结构教程
+```
+
+**3. 化学反应模拟器** — 7个经典反应，文本动画演示
+
+```python
+PM.chem.reaction()  # 生成化学反应模拟器
+```
+
+**4. 溶液计算** — 摩尔浓度、pH 值
+
+```python
+PM.chem.molarity(10, 40, 0.5)  # 10g NaOH 在 0.5L 溶液中的浓度
+PM.chem.ph(0.001)               # 从 H+ 浓度算 pH
+PM.chem.ph_from_oh(0.001)       # 从 OH- 浓度算 pH
+```
+
+**5. 化学方程式配平**
+
+```python
+PM.chem.balance("H2+O2=H2O")     # → 2H2 + O2 = 2H2O
+PM.chem.balance("Fe+O2=Fe2O3")   # → 4Fe + 3O2 = 2Fe2O3
+```
+
+**别名：** `PM.chemistry` / `PM.化学`
+
+## 数学教育模块 (v1.6.0 Education Plus) 🔢
+
+六大数学分支全覆盖，互动教程 + 直接计算函数。
+
+### 六大分支
+
+**1. 代数** — 方程、函数、因式分解、指数对数
+
+```python
+PM.math.algebra()
+PM.math.quadratic(1, -5, 6)  # 解二次方程 → x=2, x=3
+PM.math.factorial(5)         # 阶乘 → 120
+```
+
+**2. 几何** — 面积体积、勾股定理、三角函数
+
+```python
+PM.math.geometry()
+```
+
+**3. 微积分** — 导数、积分、极值（AI 基础）
+
+```python
+PM.math.calculus()
+```
+
+**4. 线性代数** — 向量、矩阵、特征值（AI 必备）
+
+```python
+PM.math.linear_algebra()
+PM.math.dot_product([1,2,3], [4,5,6])  # 点积 → 32
+PM.math.matrix_mult(A, B)              # 矩阵乘法
+```
+
+**5. 概率统计** — 概率分布、期望方差、贝叶斯
+
+```python
+PM.math.probability()
+```
+
+**6. 数论** — 质数、GCD、模运算、RSA 基础
+
+```python
+PM.math.number_theory()
+PM.math.gcd(48, 36)        # 最大公约数 → 12
+PM.math.lcm(12, 18)        # 最小公倍数 → 36
+PM.math.is_prime(17)       # 判断质数 → True
+PM.math.prime_factors(100) # 质因数分解 → 2² × 5²
+PM.math.fast_pow(3, 13, 100)  # 快速幂 → 23
+```
+
+**别名：** `PM.maths` / `PM.数学`
+
 ## 来聊天
 - 遇到 bug？[提 Issue](https://github.com/ZeroAnNull/PyMsi/issues)
 - 有想法或建议？[开 Discussion](https://github.com/ZeroAnNull/PyMsi/discussions)

@@ -1106,6 +1106,18 @@ from .hexvid import _HexVideoModule
 # ═══════════════════════════════════════════════════════════════
 from .bio import _BioModule
 
+# ═══════════════════════════════════════════════════════════════
+# 化学教育模块 (1.6.0 Education Plus) — 元素+分子+反应+溶液+配平
+# 20个元素、10种分子、7个反应、溶液计算、方程式配平
+# ═══════════════════════════════════════════════════════════════
+from .chemistry import _ChemistryModule
+
+# ═══════════════════════════════════════════════════════════════
+# 数学教育模块 (1.6.0 Education Plus) — 代数+几何+微积分+线代+概率+数论
+# 6大数学分支, 互动教程 + 直接计算函数
+# ═══════════════════════════════════════════════════════════════
+from .math import _MathModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1153,6 +1165,8 @@ class _PyMsi:
         self._morse_module = _MorseVideoModule()
         self._hexvid_module = _HexVideoModule()
         self._bio_module = _BioModule()
+        self._chemistry_module = _ChemistryModule()
+        self._math_module = _MathModule()
 
     def __call__(self, path):
         """
@@ -2250,6 +2264,87 @@ class _PyMsi:
     def 生物(self):
         """别名: PM.生物 = PM.bio"""
         return self._bio_module
+
+    @property
+    def chem(self):
+        """
+        ⚗️  化学教育模块 (1.6.0 Education Plus) — 元素+分子+反应+溶液+配平
+
+        专为程序员设计的化学教学工具:
+        1. 元素周期表 — 20个常见元素, 每个都有编程类比
+        2. 分子结构 — 10种常见分子, 用数据结构类比
+        3. 化学反应 — 7个经典反应, 带动画模拟
+        4. 溶液计算 — 摩尔浓度、pH值计算器
+        5. 方程式配平 — 简单化学方程式配平
+
+        用法:
+            PM.chem.element()          # 元素周期表教程
+            PM.chem.molecule()         # 分子结构教程
+            PM.chem.reaction()         # 化学反应模拟器
+            PM.chem.solution()         # 溶液计算器 (交互式)
+            PM.chem.balance("H2+O2=H2O")  # 配平方程式
+            PM.chem.molarity(10, 40, 0.5)  # 摩尔浓度计算
+            PM.chem.ph(0.001)          # pH计算
+            PM.chem.list_elements()    # 列出所有元素
+
+            别名: PM.chemistry / PM.化学
+        """
+        return self._chemistry_module
+
+    @property
+    def chemistry(self):
+        """别名: PM.chemistry = PM.chem"""
+        return self._chemistry_module
+
+    @property
+    def 化学(self):
+        """别名: PM.化学 = PM.chem"""
+        return self._chemistry_module
+
+    @property
+    def math(self):
+        """
+        🔢 数学教育模块 (1.6.0 Education Plus) — 6大分支全涵盖
+
+        专为程序员设计的数学教学工具:
+        1. 代数 — 方程、函数、因式分解
+        2. 几何 — 面积体积、三角函数、勾股定理
+        3. 微积分 — 导数、积分、极值 (AI基础)
+        4. 线性代数 — 向量、矩阵、特征值 (AI必备)
+        5. 概率统计 — 概率分布、期望方差、贝叶斯
+        6. 数论 — 质数、GCD、模运算、RSA基础
+
+        用法:
+            PM.math.algebra()            # 代数教程
+            PM.math.geometry()           # 几何教程
+            PM.math.calculus()           # 微积分教程
+            PM.math.linear_algebra()     # 线性代数教程
+            PM.math.probability()        # 概率统计教程
+            PM.math.number_theory()      # 数论教程
+
+            # 直接计算
+            PM.math.quadratic(1, -5, 6)  # 解二次方程
+            PM.math.factorial(5)         # 阶乘
+            PM.math.gcd(48, 36)          # 最大公约数
+            PM.math.dot_product([1,2,3], [4,5,6])  # 点积
+            PM.math.matrix_mult(A, B)    # 矩阵乘法
+            PM.math.is_prime(17)         # 判断质数
+            PM.math.prime_factors(100)   # 质因数分解
+            PM.math.fast_pow(3, 13, 100) # 快速幂
+
+            别名: PM.maths / PM.数学
+        """
+        return self._math_module
+
+    @property
+    def maths(self):
+        """别名: PM.maths = PM.math"""
+        return self._math_module
+
+    @property
+    def 数学(self):
+        """别名: PM.数学 = PM.math"""
+        return self._math_module
 
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
