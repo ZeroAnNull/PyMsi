@@ -23,12 +23,24 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.6.0  Education Plus            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 | 🎨HexRGB视频 | 🧬生物 | ⚗️化学 | 🔢数学 ║
+║                    PyMsi  v1.7.0                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 | 🎨HexRGB视频 | 🧬生物 | ⚗️化学 | 🔢数学 | 🐾MeowHawk搜索 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.6.0-py3-none-any.whl
+    pip install pymsi-1.7.0-py3-none-any.whl
+【1.7.0 新增】
+    🐾 MeowHawk 自研查找算法 (BM25排序+倒排索引+N-gram模糊匹配)
+        纯Python零依赖, 对标Lucene/ES核心算法
+        mh = PM.meowhawk()                    # 创建引擎
+        mh.add_document("Python编程语言")      # 索引文档
+        mh.search("编程语言")                   # 精确搜索
+        mh.search("编成语言", fuzzy=True)       # 模糊搜索(拼写纠错)
+        mh.suggest("编")                       # 前缀补全
+        mh.save("index.json")                  # 持久化
+        PM.meowhawk.demo()                     # 演示
+        PM.meowhawk.benchmark(1000)            # 性能测试
+        PM.meowhawk.search_in(["文档1","文档2"], "查询")  # 快捷搜索
 【1.6.0 Education Plus 新增】
     ⚗️ 化学教育模块 (元素周期表+分子结构+化学反应模拟+溶液计算+方程配平)
         PM.chem.element()          # 元素周期表教程
@@ -1131,6 +1143,12 @@ from .chemistry import _ChemistryModule
 # ═══════════════════════════════════════════════════════════════
 from .math import _MathModule
 
+# ═══════════════════════════════════════════════════════════════
+# MeowHawk 搜索引擎模块 (1.7.0 新增) — 自研查找算法
+# BM25 排序 + 倒排索引 + N-gram 模糊匹配, 纯 Python 零依赖
+# ═══════════════════════════════════════════════════════════════
+from .meowhawk import _MeowHawkModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1180,6 +1198,7 @@ class _PyMsi:
         self._bio_module = _BioModule()
         self._chemistry_module = _ChemistryModule()
         self._math_module = _MathModule()
+        self._meowhawk_module = _MeowHawkModule()
 
     def __call__(self, path):
         """
@@ -2359,6 +2378,54 @@ class _PyMsi:
         """别名: PM.数学 = PM.math"""
         return self._math_module
 
+    @property
+    def meowhawk(self):
+        """
+        🐾 MeowHawk 自研查找算法引擎 (v1.7.0)
+
+        轻量级高性能全文检索引擎, 对标主流搜索引擎核心算法:
+          - BM25 排序 (与 Lucene / Elasticsearch 相同)
+          - 倒排索引 (Inverted Index)
+          - N-gram 模糊匹配 (Jaccard 相似度, 拼写纠错)
+          - 中文双字分词 + 英文单词分词
+          - 摘要提取与高亮
+          - 纯 Python, 零依赖
+
+        用法:
+            # 创建引擎 + 索引文档
+            mh = PM.meowhawk()
+            mh.add_document("Python是最流行的编程语言")
+            mh.add_document("Java也是很好的编程语言")
+            mh.add_document("Go语言并发性能很强")
+
+            # 搜索
+            results = mh.search("编程语言")
+            for r in results:
+                print(f"  [{r.score:.2f}] {r.snippet}")
+
+            # 模糊搜索 (拼写纠错)
+            results = mh.search("编成语言", fuzzy=True)
+
+            # 前缀补全
+            print(mh.suggest("编"))
+
+            # 持久化
+            mh.save("index.json")
+            mh2 = PM.meowhawk.load("index.json")
+
+            # 快捷搜索 (一次性索引+搜索)
+            results = PM.meowhawk.search_in(["文档1", "文档2"], "查询词")
+
+            # 演示 / 基准测试
+            PM.meowhawk.demo()
+            PM.meowhawk.benchmark(num_docs=1000)
+
+            # 直接用类
+            from PyMsi.meowhawk import MeowHawk
+            mh = MeowHawk()
+        """
+        return self._meowhawk_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -2377,7 +2444,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.6.0"
+PM.__version__ = "1.7.0"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
