@@ -23,12 +23,32 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.9.0                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 | 🎨HexRGB视频 | 🧬生物 | ⚗️化学 | 🔢数学 | 🐾MeowHawk搜索 | 🔙回溯算法 | 🐮.cow格式 ║
+║                    PyMsi  v2.0.0                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 | 🎨HexRGB视频 | 🧬生物 | ⚗️化学 | 🔢数学 | 🐾MeowHawk搜索 | 🔙回溯算法 | 🐮.cow格式 | 🧠AI训练 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.9.0-py3-none-any.whl
+    pip install pymsi-2.0.0-py3-none-any.whl
+【2.0.0 新增】
+    🧠 AI 训练引擎 (自研神经网络框架, 像 TensorFlow 但更轻)
+        训练得好 = ChatGPT 级 | 训练不好 = 也能用 | 反正高效轻量零人民币
+        PM.train.Sequential([...])              # 序列模型
+        PM.train.Dense(64, activation='relu')   # 全连接层
+        PM.train.Dropout(0.5)                    # Dropout
+        PM.train.Embedding(10000, 128)           # 词嵌入
+        PM.train.Conv1D(32, 3)                   # 一维卷积
+        PM.train.SimpleRNN(64)                   # RNN
+        model.compile(optimizer='adam', ...)     # 编译
+        model.fit(X, y, epochs=10)               # 训练
+        model.predict(X)                         # 预测
+        model.save("model.pym")                  # 保存(.pym格式)
+        model = PM.train.load_model("m.pym")     # 加载
+        🔑 API 服务器 + 专属 Key 认证
+        server = PM.train.APIServer(model, 8080)
+        key = server.create_key("my_app")         # 生成 API Key
+        server.start()                            # 启动服务
+        client = PM.train.APIClient(url, key)     # 客户端调用
+        PM.train.demo()                           # 训练演示
 【1.9.0 新增】
     🐮 .cow 文件格式引擎 (无魔数, 纯base-32, 打开后自动清理)
         .cow 格式: 无魔数, 全文纯 base-32 编码, 看起来就是乱码
@@ -1190,6 +1210,13 @@ from .backtrack import _BacktrackModule
 # ═══════════════════════════════════════════════════════════════
 from .cow import _CowModule
 
+# ═══════════════════════════════════════════════════════════════
+# Train AI 训练模块 (2.0.0 新增) — 自研神经网络训练引擎
+# 像 TensorFlow 那样训练真正的 AI, 轻量高效, 零成本
+# 带专属 API Key + HTTP API 服务器
+# ═══════════════════════════════════════════════════════════════
+from .train import _TrainModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1242,6 +1269,7 @@ class _PyMsi:
         self._meowhawk_module = _MeowHawkModule()
         self._backtrack_module = _BacktrackModule()
         self._cow_module = _CowModule()
+        self._train_module = _TrainModule()
 
     def __call__(self, path):
         """
@@ -2553,6 +2581,77 @@ class _PyMsi:
         """别名: PM.牛 = PM.cow"""
         return self._cow_module
 
+    @property
+    def train(self):
+        """
+        🧠 AI 训练引擎 (v2.0.0)
+
+        自研轻量级神经网络训练框架, 纯 Python + NumPy, 零其他依赖.
+        像 TensorFlow 那样训练真正的 AI, 但更轻更快, 零成本.
+
+        格言:
+          训练得好 = ChatGPT 级
+          训练不好 = 也能用
+          反正高效轻量, 零人民币
+
+        快速上手:
+            # 1. 构建模型
+            model = PM.train.Sequential([
+                PM.train.Dense(128, activation='relu', input_shape=(784,)),
+                PM.train.Dense(64, activation='relu'),
+                PM.train.Dense(10, activation='softmax'),
+            ])
+
+            # 2. 编译
+            model.compile(optimizer='adam', loss='crossentropy', metrics=['accuracy'])
+
+            # 3. 训练
+            model.fit(X_train, y_train, epochs=10, batch_size=32)
+
+            # 4. 预测
+            predictions = model.predict(X_test)
+
+            # 5. 保存/加载
+            model.save("my_model.pym")
+            model = PM.train.load_model("my_model.pym")
+
+            # 6. 启动 API 服务器 (带专属 Key)
+            server = PM.train.APIServer(model, port=8080)
+            key = server.create_key("my_app")
+            server.start()
+
+            # 7. 客户端调用
+            client = PM.train.APIClient("http://localhost:8080", api_key="sk-xxxx")
+            result = client.predict(data=[[1,2,3,4]])
+
+        支持的层:
+            Dense (全连接)
+            Dropout (丢弃)
+            Embedding (词嵌入)
+            Conv1D (一维卷积)
+            SimpleRNN (循环神经网络)
+            Flatten (展平)
+            Activation (激活)
+
+        优化器:
+            SGD, Adam, RMSprop
+
+        损失函数:
+            MSE, CrossEntropy, MAE, BCE
+
+        工具:
+            train_test_split, DataGenerator, Tokenizer
+
+        演示:
+            PM.train.demo()  # 运行完整训练演示
+        """
+        return self._train_module
+
+    @property
+    def 训练(self):
+        """别名: PM.训练 = PM.train"""
+        return self._train_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -2571,7 +2670,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.9.0"
+PM.__version__ = "2.0.0"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
