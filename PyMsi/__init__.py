@@ -23,12 +23,25 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v1.8.0                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 | 🎨HexRGB视频 | 🧬生物 | ⚗️化学 | 🔢数学 | 🐾MeowHawk搜索 | 🔙回溯算法 ║
+║                    PyMsi  v1.9.0                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 | 🎨HexRGB视频 | 🧬生物 | ⚗️化学 | 🔢数学 | 🐾MeowHawk搜索 | 🔙回溯算法 | 🐮.cow格式 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-1.8.0-py3-none-any.whl
+    pip install pymsi-1.9.0-py3-none-any.whl
+【1.9.0 新增】
+    🐮 .cow 文件格式引擎 (无魔数, 纯base-32, 打开后自动清理)
+        .cow 格式: 无魔数, 全文纯 base-32 编码, 看起来就是乱码
+        打开 .cow → 解码 → 临时目录 → 系统默认程序 → 退出后清理
+        PM.cow.pack("photo.jpg")            # 打包 → photo.jpg.cow
+        PM.cow.unpack("photo.jpg.cow")      # 解包 → photo.jpg
+        PM.cow.run("photo.jpg.cow")          # 打开→退出后自动清理
+        PM.cow.info("photo.jpg.cow")         # 文件信息
+        PM.cow.encode(b"hello")             # base-32 编码
+        PM.cow.decode("NBSWY3DP")           # base-32 解码
+        PM.cow.batch_pack(["a.txt"])        # 批量打包
+        PM.cow.verify("photo.jpg.cow")       # 校验完整性
+        PM.cow.moo()                         # 🐮
 【1.8.0 新增】
     🔙 回溯算法暴力引擎 (10种经典问题 + 通用框架)
         暴力极快 — 1毫秒一次尝试, 1秒1000次, 100秒10万次
@@ -1171,6 +1184,12 @@ from .meowhawk import _MeowHawkModule
 # ═══════════════════════════════════════════════════════════════
 from .backtrack import _BacktrackModule
 
+# ═══════════════════════════════════════════════════════════════
+# Cow 文件格式模块 (1.9.0 新增) — .cow 格式引擎
+# 无魔数, 纯 base-32 内容, 打开→临时目录→退出后清理
+# ═══════════════════════════════════════════════════════════════
+from .cow import _CowModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1222,6 +1241,7 @@ class _PyMsi:
         self._math_module = _MathModule()
         self._meowhawk_module = _MeowHawkModule()
         self._backtrack_module = _BacktrackModule()
+        self._cow_module = _CowModule()
 
     def __call__(self, path):
         """
@@ -2498,6 +2518,41 @@ class _PyMsi:
         """别名: PM.回溯 = PM.backtrack"""
         return self._backtrack_module
 
+    @property
+    def cow(self):
+        """
+        🐮 .cow 文件格式引擎 (v1.9.0)
+
+        无魔数, 纯 base-32 内容, 谁看都是乱码.
+        打开 .cow → 解码 → 临时目录 → 系统默认程序打开 → 退出后自动清理, 不占内存.
+
+        .cow 格式规范:
+          1. 无魔数 (no magic number)
+          2. 全文纯 base-32 编码 (A-Z, 2-7), 看起来就是乱码
+          3. 去掉 padding, 更加混乱
+          4. 解码后: 原始文件名\\x00 + 原始文件二进制
+
+        用法:
+            PM.cow.pack("photo.jpg")            # 打包 → photo.jpg.cow
+            PM.cow.unpack("photo.jpg.cow")      # 解包 → photo.jpg
+            PM.cow.run("photo.jpg.cow")          # 解包→临时目录→打开→退出后清理
+            PM.cow.info("photo.jpg.cow")         # 显示文件信息
+            PM.cow.encode(b"hello")             # base-32 编码
+            PM.cow.decode("NBSWY3DP")           # base-32 解码
+            PM.cow.batch_pack(["a.txt","b.txt"]) # 批量打包
+            PM.cow.verify("photo.jpg.cow")       # 校验完整性
+            PM.cow.is_cow("file.cow")            # 判断是否 .cow
+            PM.cow.list_cows(".")               # 列出目录下 .cow
+            PM.cow.moo()                         # 🐮
+            PM.cow.demo()                        # 演示
+        """
+        return self._cow_module
+
+    @property
+    def 牛(self):
+        """别名: PM.牛 = PM.cow"""
+        return self._cow_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -2516,7 +2571,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "1.8.0"
+PM.__version__ = "1.9.0"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
