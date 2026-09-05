@@ -23,12 +23,21 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v2.2.0                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 | 🎨HexRGB视频 | 🧬生物 | ⚗️化学 | 🔢数学 | 🐾MeowHawk搜索 | 🔙回溯算法 | 🐮.cow格式 | 🧠AI训练 | 🤖.mnn G进制 | 🎬pyx视频提取 ║
+║                    PyMsi  v2.3.0                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 | 🎨HexRGB视频 | 🧬生物 | ⚗️化学 | 🔢数学 | 🐾MeowHawk搜索 | 🔙回溯算法 | 🐮.cow格式 | 🧠AI训练 | 🤖.mnn G进制 | 🎬pyx视频提取 | 📊ckon视频验证 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-2.2.0-py3-none-any.whl
+    pip install pymsi-2.3.0-py3-none-any.whl
+【2.3.0 新增】
+    📊 ckon 视频验证 — 类似 ffprobe, 100种信息全放进 .ckon
+        ckon = Log 日志文件的变体, 小白也能读懂
+        包含: 文件信息/格式/视频轨道/音频轨道/验证结果/详细检查
+        PM.pyx.probe("video.mp4")                # → video.ckon
+        PM.pyx.probe("video.mp4", "info.ckon")   # 指定输出
+    🎬 pyx 视频模式 — 视频链接 → 完整视频文件
+        PM.pyx.video(url, format='mp4')          # 下载视频
+        PM.pyx.video(url, output='out.mov')      # 指定输出格式
 【2.2.0 新增】
     🎬 pyx 视频提取引擎 — Vmp模式 (B站/抖音/YouTube/快手/小红书... 通通提取)
         遇到好听的音乐却没办法保存到本地？Vmp = Video → Music
@@ -2795,7 +2804,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "2.2.0"
+PM.__version__ = "2.3.0"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name

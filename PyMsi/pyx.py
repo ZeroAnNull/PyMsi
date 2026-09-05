@@ -71,9 +71,18 @@ def _parse_bilibili(url):
       - BV号: BV1xx411c7mD
       - b23.tv 短链接
       - bilibili.com 完整链接
+      - av号: av123456
     """
     result = {'platform': 'bilibili', 'original_url': url, 'direct_url': None,
               'title': None, 'type': 'video'}
+
+    is_bilibili = ('bilibili.com' in url or 'b23.tv' in url or
+                   re.search(r'BV[a-zA-Z0-9]{10}', url) or
+                   re.search(r'av\d+', url, re.IGNORECASE))
+
+    if not is_bilibili:
+        result['status'] = 'not_bilibili'
+        return result
 
     # 提取 BV 号
     bv_match = re.search(r'(BV[a-zA-Z0-9]{10})', url)
@@ -101,8 +110,15 @@ def _parse_bilibili(url):
         except Exception as e:
             result['status'] = 'parse_failed'
             result['error'] = str(e)
+    elif 'b23.tv' in url:
+        # b23.tv 短链接，需要重定向
+        result['status'] = 'short_url'
+        result['note'] = 'B站短链接，需重定向获取真实地址'
+        result['title'] = 'B站视频'
     else:
         result['status'] = 'no_bvid'
+        result['title'] = 'B站视频'
+        result['note'] = '未找到BV号，可能是B站其他页面'
 
     return result
 
