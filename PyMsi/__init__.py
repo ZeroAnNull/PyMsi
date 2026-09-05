@@ -23,12 +23,24 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v2.1.0                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 | 🎨HexRGB视频 | 🧬生物 | ⚗️化学 | 🔢数学 | 🐾MeowHawk搜索 | 🔙回溯算法 | 🐮.cow格式 | 🧠AI训练 | 🤖.mnn G进制 ║
+║                    PyMsi  v2.2.0                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 | 🎨HexRGB视频 | 🧬生物 | ⚗️化学 | 🔢数学 | 🐾MeowHawk搜索 | 🔙回溯算法 | 🐮.cow格式 | 🧠AI训练 | 🤖.mnn G进制 | 🎬pyx视频提取 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-2.1.0-py3-none-any.whl
+    pip install pymsi-2.2.0-py3-none-any.whl
+【2.2.0 新增】
+    🎬 pyx 视频提取引擎 — Vmp模式 (B站/抖音/YouTube/快手/小红书... 通通提取)
+        遇到好听的音乐却没办法保存到本地？Vmp = Video → Music
+        纯 Python 标准库, 不加 ffmpeg/ffprobe, 零依赖
+        PM.pyx.vmp(url, format='mp3')       # 视频链接 → MP3
+        PM.pyx.vmp(url, format='wav')       # 视频链接 → WAV
+        PM.pyx.vmp(url, format='ogg')       # 视频链接 → OGG
+        PM.pyx.vmp(url, format='flac')      # 视频链接 → FLAC
+        PM.pyx.vmp(url, format='aac')       # 视频链接 → AAC
+        PM.pyx.download(url, path)          # 下载视频
+        PM.pyx.parse_url(url)               # 解析视频链接
+        支持: B站/抖音/YouTube/快手/小红书/直接视频链接
 【2.1.0 新增】
     🤖 .mnn 文件格式引擎 (G进制, 把日志文件彻底翻了个天)
         人类看不懂, 只有机器能看懂 — 内部存的是 G进制 (数字位移 + 交替标记)
@@ -1236,6 +1248,13 @@ from .train import _TrainModule
 # ═══════════════════════════════════════════════════════════════
 from .mnn import _MnnModule
 
+# ═══════════════════════════════════════════════════════════════
+# Pyx 视频提取引擎 (2.2.0 / 2.3.0 新增) — Vmp模式 / 视频模式 / ckon验证
+# B站/抖音/YouTube/快手/小红书... 通通给你提取
+# 纯 Python 标准库, 不加 ffmpeg/ffprobe
+# ═══════════════════════════════════════════════════════════════
+from .pyx import _PyxModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1290,6 +1309,7 @@ class _PyMsi:
         self._cow_module = _CowModule()
         self._train_module = _TrainModule()
         self._mnn_module = _MnnModule()
+        self._pyx_module = _PyxModule()
 
     def __call__(self, path):
         """
@@ -2709,6 +2729,54 @@ class _PyMsi:
         """
         return self._mnn_module
 
+    @property
+    def pyx(self):
+        """
+        🎬 pyx 视频提取引擎 (v2.2.0 / v2.3.0 新增)
+
+        我管你是什么B站短链接B站长链接抖音长链接抖音短链接
+        还是什么YouTube快手小红书链接等等的，
+        他只要是能看的东西，通通给你提取！
+
+        纯 Python 标准库实现, 不加 ffmpeg/ffprobe, 零依赖.
+
+        Vmp 模式 (v2.2.0):
+          遇到好听的音乐却没办法保存到本地？
+          Vmp = Video → Music → 自动提取音频，转成你要的格式
+          支持: .mp3 .wav .ogg .flac .aac
+
+        视频模式 (v2.3.0):
+          把视频链接变成完整的视频文件
+          支持: .mp4 .mov 等
+
+        视频验证 (v2.3.0):
+          类似 ffprobe，把视频的 100 种信息全部放进 .ckon
+          ckon = Log 日志文件的变体，小白也能读懂
+
+        用法:
+            # Vmp 模式: 视频 → 音频
+            PM.pyx.vmp(url, format='mp3')        # 视频链接→MP3
+            PM.pyx.vmp(url, output='song.wav')   # 视频链接→WAV
+            PM.pyx.vmp('local.mp4', format='flac') # 本地视频→FLAC
+
+            # 视频模式: 下载视频
+            PM.pyx.video(url, format='mp4')      # 下载视频
+            PM.pyx.video(url, output='out.mov')  # 指定输出
+
+            # 视频验证: 生成 .ckon
+            PM.pyx.probe('video.mp4')            # → video.ckon
+            PM.pyx.probe('video.mp4', 'info.ckon') # 指定输出
+
+            # 工具
+            PM.pyx.download(url, path)           # 下载文件
+            PM.pyx.parse_url(url)                # 解析视频链接
+            PM.pyx.demo()                        # 演示
+
+        支持平台:
+          B站 / 抖音 / YouTube / 快手 / 小红书 / 直接视频链接
+        """
+        return self._pyx_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -2727,7 +2795,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "2.1.0"
+PM.__version__ = "2.2.0"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
