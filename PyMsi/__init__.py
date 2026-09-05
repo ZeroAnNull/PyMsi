@@ -23,12 +23,25 @@ from datetime import datetime
 
 _README = r"""
 ╔══════════════════════════════════════════════════════════════╗
-║                    PyMsi  v2.0.0                            ║
-║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 | 🎨HexRGB视频 | 🧬生物 | ⚗️化学 | 🔢数学 | 🐾MeowHawk搜索 | 🔙回溯算法 | 🐮.cow格式 | 🧠AI训练 ║
+║                    PyMsi  v2.1.0                            ║
+║ 文件夹→MSI | HTML→EXE | 30+游戏 | 图片→TTF | Hex | AI | 翻译 | 邮件 | 文件串🧶 | 🔐KeyKey | 🔒独家加密 | 🌐服务器 | 🌍浏览器 | 📦Shrink-Zeta | 📹录屏 | 🐱.meow | 🔐提权 | 📦.nano | 📡摩斯密码视频 | 🎨HexRGB视频 | 🧬生物 | ⚗️化学 | 🔢数学 | 🐾MeowHawk搜索 | 🔙回溯算法 | 🐮.cow格式 | 🧠AI训练 | 🤖.mnn G进制 ║
 ╚══════════════════════════════════════════════════════════════╝
 
 【安装】
-    pip install pymsi-2.0.0-py3-none-any.whl
+    pip install pymsi-2.1.0-py3-none-any.whl
+【2.1.0 新增】
+    🤖 .mnn 文件格式引擎 (G进制, 把日志文件彻底翻了个天)
+        人类看不懂, 只有机器能看懂 — 内部存的是 G进制 (数字位移 + 交替标记)
+        .mnn 格式: 无魔数, 纯二进制, 无文本无换行
+        PM.mnn.pack("log.txt")              # 打包 → log.txt.mnn
+        PM.mnn.unpack("log.txt.mnn")        # 解包 → log.txt
+        PM.mnn.run("log.txt.mnn")            # 打开→退出后自动清理
+        PM.mnn.info("log.txt.mnn")           # 文件信息
+        PM.mnn.encode(b"hello")             # G进制编码
+        PM.mnn.decode(encoded_bytes)        # G进制解码
+        PM.mnn.batch_pack(["a.txt"])        # 批量打包
+        PM.mnn.verify("log.txt.mnn")         # 校验完整性
+        PM.mnn.demo()                        # 演示
 【2.0.0 新增】
     🧠 AI 训练引擎 (自研神经网络框架, 像 TensorFlow 但更轻)
         训练得好 = ChatGPT 级 | 训练不好 = 也能用 | 反正高效轻量零人民币
@@ -1217,6 +1230,12 @@ from .cow import _CowModule
 # ═══════════════════════════════════════════════════════════════
 from .train import _TrainModule
 
+# ═══════════════════════════════════════════════════════════════
+# Mnn 文件格式模块 (2.1.0 新增) — .mnn G进制文件格式引擎
+# 把日志文件彻底翻了个天, 人类看不懂, 机器能懂
+# ═══════════════════════════════════════════════════════════════
+from .mnn import _MnnModule
+
 
 # ═══════════════════════════════════════════════════════════════
 # 主类
@@ -1270,6 +1289,7 @@ class _PyMsi:
         self._backtrack_module = _BacktrackModule()
         self._cow_module = _CowModule()
         self._train_module = _TrainModule()
+        self._mnn_module = _MnnModule()
 
     def __call__(self, path):
         """
@@ -2652,6 +2672,43 @@ class _PyMsi:
         """别名: PM.训练 = PM.train"""
         return self._train_module
 
+    @property
+    def mnn(self):
+        """
+        🤖 .mnn 文件格式引擎 (v2.1.0 新增)
+
+        把日志文件彻底翻了个天 — G进制编码, 人类看不懂, 只有机器能看懂.
+
+        .mnn 格式规范:
+          1. 人类看不懂, 只有机器能看懂
+          2. 内部存的是 G进制 (G-base)
+          3. 无文本, 无换行, 纯二进制
+          4. 无魔数 (实际用 MNN 标记)
+
+        G进制 编码流程:
+          1. 用户给的字符串 → 转成数字 (十进制)
+          2. 每个位数向前进二 (digit + 2, mod 10, 带进位)
+          3. 如果二过十 (进位), 则进 n 字节
+          4. 长度标记: 交替 0/1 模式
+             - 位数是 3 → 标记 "010" (3 bits)
+             - 位数是 67 → 标记 "0101...0" (67 bits, 交替)
+          5. 存储: [头部][交替0/1长度标记][位移后的数字字节]
+
+        用法:
+            PM.mnn.pack("log.txt")              # 打包 → log.txt.mnn
+            PM.mnn.unpack("log.txt.mnn")        # 解包 → log.txt
+            PM.mnn.run("log.txt.mnn")           # 解包→临时目录→打开→退出后清理
+            PM.mnn.info("log.txt.mnn")           # 显示文件信息
+            PM.mnn.encode(b"hello")            # G进制编码
+            PM.mnn.decode(encoded_bytes)        # G进制解码
+            PM.mnn.batch_pack(["a.txt"])        # 批量打包
+            PM.mnn.verify("log.txt.mnn")         # 校验完整性
+            PM.mnn.is_mnn("file.mnn")           # 判断是否 .mnn
+            PM.mnn.list_mnns(".")              # 列出目录下 .mnn
+            PM.mnn.demo()                        # 演示
+        """
+        return self._mnn_module
+
 
 # ─── 模块替换：把自身变成可调用的 PM 实例 ─────────────────
 # 先捕获所有模块属性，再替换 sys.modules
@@ -2670,7 +2727,7 @@ _sys.modules[__name__] = PM
 
 # 保留模块属性以便 from PyMsi import ... 和包发现正常工作
 PM.__all__ = ["PM"]
-PM.__version__ = "2.0.0"
+PM.__version__ = "2.1.0"
 PM.__file__ = _module_file
 PM.__path__ = _module_path
 PM.__name__ = _module_name
